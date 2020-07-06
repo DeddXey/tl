@@ -1,0 +1,13 @@
+/doc/
+/bld/
+/target/
+*.map
+*.uvgui.*
+*.dep
+*.user
+*.aux
+*.user.*
+*.autosave
+build-*
+#*.*
+~*.*
