@@ -11,6 +11,6 @@ option(
 enable_testing()
 
 
-add_subdirectory(googletests)
+add_subdirectory(googletest)
 add_subdirectory(tests)
 add_subdirectory(tl)

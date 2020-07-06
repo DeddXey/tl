@@ -18,5 +18,6 @@ target_include_directories(tests PUBLIC
     )
 
 target_link_libraries(tests
+    tl
     gtest)
 
