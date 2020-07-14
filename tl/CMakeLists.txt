@@ -14,3 +14,8 @@ ${SRC}
 target_include_directories (tl PUBLIC
     "include"
     )
+
+#set(DOXYGEN_RECURSIVE YES)
+#doxygen_add_docs(tldocs
+#    ${PROJECT_SOURCE_DIR}
+#    )

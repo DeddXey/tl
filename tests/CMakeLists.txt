@@ -6,7 +6,10 @@ project(tests)
 set(SRCS
     tests
     fifo_tst
+    utils_tst
 )
+
+
 
 add_executable(tests  ${SRCS})
 
@@ -21,3 +24,5 @@ target_link_libraries(tests
     tl
     gtest)
 
+
+target_link_options(tests PRIVATE "/MAP:${PROJECT_SOURCE_DIR}/file.map")
