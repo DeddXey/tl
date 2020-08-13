@@ -1,5 +1,5 @@
 #include "dsp/goertzel.h"
-#include "gpio.h"
+//#include "gpio.h"
 //------------------------------------------------------------------------
 GoertzelD::GoertzelD():
     tone(0),
