@@ -33,6 +33,7 @@ addons:
 apt:
   packages:
     - doxygen
+    - dot
 #env:
 #  global:
 #  - OPENSSL_DIR=$(brew --prefix openssl)
