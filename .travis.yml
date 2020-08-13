@@ -28,6 +28,11 @@ branches:
   - "/^v\\d+\\./"
 notifications:
   email: false
+
+addons:
+apt:
+  packages:
+    - doxygen
 #env:
 #  global:
 #  - OPENSSL_DIR=$(brew --prefix openssl)
