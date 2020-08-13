@@ -16,7 +16,7 @@ ruby: 2.2.0
 #- if [ $TRAVIS_OS_NAME == linux ]; then ./scripts/dependencies.sh; fi
 #- if [ $TRAVIS_OS_NAME == osx ]; then brew update && brew install llvm38 && brew install openssl && brew link --force --overwrite llvm38; fi
 script:
-- cmake
+- cmake CMakeLists.txt
 - make
 
 #- if [ $TRAVIS_OS_NAME == linux ]; then ./build.sh --llvm-config=llvm-config --cc=clang --cxx=clang++; fi
