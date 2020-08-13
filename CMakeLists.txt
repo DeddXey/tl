@@ -2,9 +2,9 @@ cmake_minimum_required (VERSION 3.8)
 
 project(tl)
 
-find_package(Doxygen
-             REQUIRED dot
-             OPTIONAL_COMPONENTS mscgen dia)
+#find_package(Doxygen
+#             REQUIRED dot
+#             OPTIONAL_COMPONENTS mscgen dia)
 
 
 option(
@@ -19,19 +19,19 @@ add_subdirectory(googletest)
 add_subdirectory(tests)
 add_subdirectory(tl)
 
-set(DOXYGEN_RECURSIVE YES)
-set(DOXYGEN_EXCLUDE_PATTERNS
-    */.git/*
-    */.svn/*
-    */.hg/*
-    */CMakeFiles/*
-    */_CPack_Packages/*
-    DartConfiguration.tcl
-    */bld/*
-    */googletest/*
-    CMakeLists.txt
-    CMakeCache.txt)
+#set(DOXYGEN_RECURSIVE YES)
+#set(DOXYGEN_EXCLUDE_PATTERNS
+#    */.git/*
+#    */.svn/*
+#    */.hg/*
+#    */CMakeFiles/*
+#    */_CPack_Packages/*
+#    DartConfiguration.tcl
+#    */bld/*
+#    */googletest/*
+#    CMakeLists.txt
+#    CMakeCache.txt)
 
-doxygen_add_docs(tldocs
-    ALL
-    )
+#doxygen_add_docs(tldocs
+#    ALL
+#    )
