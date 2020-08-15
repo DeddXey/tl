@@ -27,6 +27,7 @@ after_success:
 branches:
   only:
   - develop
+  - master
   - "/^v\\d+\\./"
 notifications:
   email: false
