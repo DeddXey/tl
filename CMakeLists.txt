@@ -1,10 +1,10 @@
-cmake_minimum_required (VERSION 3.10)
+cmake_minimum_required (VERSION 3.12)
 
 project(tl)
 
-find_package(Doxygen
-             REQUIRED dot
-             OPTIONAL_COMPONENTS mscgen dia)
+#find_package(Doxygen
+#             REQUIRED dot
+#             OPTIONAL_COMPONENTS mscgen dia)
 
 
 option(
@@ -15,7 +15,7 @@ option(
 enable_testing()
 
 
-add_subdirectory(doctest)
+add_subdirectory(googletest)
 add_subdirectory(tests)
 add_subdirectory(tl)
 add_subdirectory(dbg)
