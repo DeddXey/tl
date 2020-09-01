@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <tuple>
 #include <utility>
-
+#include "view.h"
 
 
 //------------------------------------------------------------------------
@@ -44,6 +44,44 @@ public:
 
     void addByte(const uint8_t byte);
 };
+
+//------------------------------------------------------------------------
+template<typename T>
+constexpr uint8_t Crc8_16(const T &c) {
+    uint8_t crc = 0xFF;
+    // unsigned int i;
+
+    for (auto &a: c) {
+        crc ^= ((a >> 8U) & 0xffU);
+        for (auto i = 0U; i < 8U; i++)
+            crc = crc & 0x80U ? (crc << 1U) ^ 0x31U : crc << 1U;
+        crc ^= (a & 0xffU);
+        for (auto i = 0U; i < 8; i++)
+            crc = crc & 0x80U ? (crc << 1U) ^ 0x31U : crc << 1U;
+    }
+
+    return crc;
+}
+
+//------------------------------------------------------------------------
+template<typename T>
+constexpr uint8_t Crc8(const T &c) {
+    uint8_t crc = 0xFF;
+    // unsigned int i;
+
+    for (auto &a: c) {
+        crc ^= ((a >> 8U) & 0xffU);
+        for (auto i = 0U; i < 8U; i++)
+            crc = crc & 0x80U ? (crc << 1U) ^ 0x31U : crc << 1U;
+        crc ^= (a & 0xffU);
+        for (auto i = 0U; i < 8; i++)
+            crc = crc & 0x80U ? (crc << 1U) ^ 0x31U : crc << 1U;
+    }
+
+    return crc;
+}
+
+
 
 
 

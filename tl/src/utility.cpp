@@ -7,52 +7,52 @@ void simpleDelay(volatile uint32_t delay) // noinline НЕ ТРОГАТЬ!
     }
 }
 
+////---------------------------------------------------------------------------
+//uint8_t hexLetterToByte(const uint8_t letter)
+//{
+//    uint8_t out = 0;
+
+//    if ((letter >= 0x30) &&
+//            letter <= 0x39) {
+//        out = letter - 0x30;
+//    }
+//    else {
+//        const uint8_t normalizedLetter = letter & 0x4f;
+
+//        if ((normalizedLetter >= 0x41) &&
+//                normalizedLetter <= 0x46) {
+//            out = normalizedLetter - 0x41 + 0x0A;
+//        }
+//    }
+//    return out;
+//}
+
+////---------------------------------------------------------------------------
+//uint8_t decLetterToByte(const uint8_t letter)
+//{
+//    uint8_t out = 0;
+
+//    if ((letter >= 0x30) &&
+//            letter <= 0x39) {
+//        out = letter - 0x30;
+//    }
+
+//    return out;
+//}
+
 //---------------------------------------------------------------------------
-uint8_t hexLetterToByte(const uint8_t letter)
-{
-    uint8_t out = 0;
+//constexpr int32_t readAdcSample(const uint8_t *ptr)
+//{
+//	int32_t tmp = *(ptr) << 24 |
+//	               (*(ptr + 1) << 16)|
+//	               (*(ptr + 2) << 8);
+////	tmp = __REV(tmp);
+////	int32_t* pTmp = reinterpret_cast<int32_t*>(&tmp);
+////	*pTmp >>= 8;
+////	return *pTmp;
 
-    if ((letter >= 0x30) &&
-            letter <= 0x39) {
-        out = letter - 0x30;
-    }
-    else {
-        const uint8_t normalizedLetter = letter & 0x4f;
-
-        if ((normalizedLetter >= 0x41) &&
-                normalizedLetter <= 0x46) {
-            out = normalizedLetter - 0x41 + 0x0A;
-        }
-    }
-    return out;
-}
-
-//---------------------------------------------------------------------------
-uint8_t decLetterToByte(const uint8_t letter)
-{
-    uint8_t out = 0;
-
-    if ((letter >= 0x30) &&
-            letter <= 0x39) {
-        out = letter - 0x30;
-    }
-
-    return out;
-}
-
-//---------------------------------------------------------------------------
-int32_t readAdcSample(const uint8_t *ptr)
-{
-	int32_t tmp = *(ptr) << 24 |
-	               (*(ptr + 1) << 16)|
-	               (*(ptr + 2) << 8);
-//	tmp = __REV(tmp);
-//	int32_t* pTmp = reinterpret_cast<int32_t*>(&tmp);
-//	*pTmp >>= 8;
-//	return *pTmp;
-
-	return tmp >> 8;
-}
+//	return tmp >> 8;
+//}
 
 //---------------------------------------------------------------------------
 #define MAX_PRECISION	(10)
