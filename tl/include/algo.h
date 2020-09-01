@@ -8,15 +8,14 @@
 ///
 /// Функция возвращает ближайшее число из заданной серии
 /// Серия задается в интервале 1..10, множитель автоматически учитывается
-/// \todo попробовать избавиться от строки  T divider = pow(10, floor(log10(aval)));
+/// \todo избавиться от строки  T divider = pow(10, floor(log10(aval)));
 template <typename T, typename M>
-T getNearestFromSeries(const T val, const M& arr)
+constexpr T getNearestFromSeries(const T val, const M& arr) noexcept
 {
     T len = std::numeric_limits<T>::max();
     T out = 1;
     T aval = std::abs(val);
-    T divider = pow(10, floor(log10(aval)));
-
+    T divider = aval?pow(10, floor(log10(aval + 1e-20))):1.0;
     T val10 = aval / divider;
 
     for (auto a: arr) {

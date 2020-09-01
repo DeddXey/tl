@@ -32,7 +32,33 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02681de8-a0be-4ceb-9422-63bd87afde87" name="Default Changelist" comment="" />
+    <list default="true" id="02681de8-a0be-4ceb-9422-63bd87afde87" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tl/include/floatstatic.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/tl.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/tl.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/tl/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/algo.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/algo.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/bufferdescriptor.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/bufferdescriptor.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/checksum.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/checksum.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/color.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/color.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/dsp/dds.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/dsp/dds.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/dsp/filters.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/dsp/filters.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/dsp/fir.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/dsp/fir.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/dsp/goertzel.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/dsp/goertzel.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/feature.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/feature.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/fifo.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/fifo.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/fifo_atomic.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/fifo_atomic.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/fmt.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/fmt.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/oscilloscope.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/oscilloscope.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/statcnt.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/statcnt.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/table.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/table.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/include/tlcfg.h" beforeDir="false" afterPath="$PROJECT_DIR$/tl/include/tlcfg.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tl/src/utility.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/tl/src/utility.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -80,16 +106,36 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="settings.editor.selected.configurable" value="zielu.svntoolbox.prj.config" />
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Doctest.All in tests">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="All in tests" type="CMakeDoctestTestRunConfigurationType" factoryName="doctest Test" nameIsGenerated="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="Project" TARGET_NAME="tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="Project" RUN_TARGET_NAME="tests" TEST_MODE="SUITE_TEST">
+    <configuration name="All in tests" type="CMakeDoctestTestRunConfigurationType" factoryName="doctest Test" nameIsGenerated="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="tl" TARGET_NAME="tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="tl" RUN_TARGET_NAME="tests" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="dbg" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="tl" TARGET_NAME="dbg" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="tl" RUN_TARGET_NAME="dbg">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="doctest_with_main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="tl" TARGET_NAME="doctest_with_main" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tl" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="tl" TARGET_NAME="tl" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="tldocs" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="tl" TARGET_NAME="tldocs" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
@@ -97,6 +143,13 @@
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <list>
+      <item itemvalue="CMake Application.tldocs" />
+      <item itemvalue="CMake Application.dbg" />
+      <item itemvalue="CMake Application.doctest_with_main" />
+      <item itemvalue="CMake Application.tl" />
+      <item itemvalue="Doctest.All in tests" />
+    </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -107,7 +160,7 @@
       <option name="presentableId" value="Default" />
       <updated>1598970034394</updated>
       <workItem from="1598970036560" duration="43000" />
-      <workItem from="1598970098492" duration="7395000" />
+      <workItem from="1598970098492" duration="7776000" />
     </task>
     <servers />
   </component>
@@ -172,6 +225,14 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state width="1874" height="274" key="GridCell.Tab.0.right/0.0.1920.1040@0.0.1920.1040" timestamp="1599037996208" />
+    <state x="182" y="89" width="1536" height="862" key="MergeDialog" timestamp="1599039373614">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="182" y="89" width="1536" height="862" key="MergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599039373614" />
+    <state x="603" y="283" width="704" height="473" key="MultipleFileMergeDialog" timestamp="1599039373616">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="603" y="283" width="704" height="473" key="MultipleFileMergeDialog/0.0.1920.1040@0.0.1920.1040" timestamp="1599039373616" />
     <state x="464" y="155" key="SettingsEditor" timestamp="1599037680571">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
