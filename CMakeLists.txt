@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.8)
 
 project(tl)
 
@@ -15,7 +15,7 @@ option(
 enable_testing()
 
 
-add_subdirectory(googletest)
+add_subdirectory(doctest)
 add_subdirectory(tests)
 add_subdirectory(tl)
 add_subdirectory(dbg)
