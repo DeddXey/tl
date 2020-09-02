@@ -9,6 +9,8 @@
 *.user.*
 *.autosave
 .idea/
+cmake-build-*
+CMakeFiles*
 dbg/
 build-*
 #*.*
