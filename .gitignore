@@ -8,7 +8,7 @@
 *.aux
 *.user.*
 *.autosave
-.idea/*
+.idea/
 dbg/
 build-*
 #*.*
