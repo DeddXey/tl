@@ -205,7 +205,7 @@ constexpr int16_t reverse16s(int16_t in)
 /// \param width the minimal width of the result string (without the sign).
 /// If the result is shotter it appends with zeros.
 ///
-constexpr uint32_t n2TBufferSize = 30;
+//constexpr uint32_t n2TBufferSize = 30;
 template <typename T>
 constexpr std::array<uint8_t, n2TBufferSize> num2Array(const T number,
                                                        uint8_t base = 10,
