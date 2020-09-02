@@ -9,6 +9,7 @@ cmake-build-*
 *.aux
 *.user.*
 *.autosave
+.idea/*
 dbg/
 build-*
 CMakeFiles/
