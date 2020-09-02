@@ -1,9 +1,9 @@
-#include "gtest/gtest.h"
+#include "doctest.h"
 #include "statcnt.h"
-
+#include "utility.h"
 
 //----------------------------------------------------
-TEST(statcnt, SlipStatCnt)
+TEST_CASE("statcnt, SlipStatCnt")
 {
     float a[] = {
         1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f
@@ -15,7 +15,7 @@ TEST(statcnt, SlipStatCnt)
         sc.addValue(i);
     }
 
-    EXPECT_FLOAT_EQ(1.0f, sc.getMin());
-    EXPECT_FLOAT_EQ(7.0f, sc.getMax());
-    EXPECT_FLOAT_EQ(4.0f, sc.getAvg());
+    CHECK(isFloatingSame(1.0f, sc.getMin()));
+    CHECK(isFloatingSame(7.0f, sc.getMax()));
+    CHECK(isFloatingSame(4.0f, sc.getAvg()));
 }

@@ -1,4 +1,4 @@
-﻿cmake_minimum_required (VERSION 3.12)
+cmake_minimum_required (VERSION 3.18)
 
 project(tests)
 
@@ -13,12 +13,13 @@ target_sources(tests
 
 
 target_include_directories(tests PUBLIC
-    "../googletest/googletest/include"
+    "../doctest/doctest/"
     )
 
 target_link_libraries(tests
     tl
-    gtest)
+    doctest
+        pthread)
 
 target_compile_features(tests
     PRIVATE cxx_std_17
