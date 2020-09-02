@@ -1,6 +1,7 @@
 /doc/
 /bld/
 /target/
+cmake-build-*
 *.map
 *.uvgui.*
 *.dep
@@ -8,9 +9,9 @@
 *.aux
 *.user.*
 *.autosave
-.idea/
 cmake-build-*
 CMakeFiles*
+.idea/*
 dbg/
 build-*
 #*.*
