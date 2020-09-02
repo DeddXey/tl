@@ -1,11 +1,10 @@
-
+#include "doctest.h"
 
 #include "fifo.h"
 #include "fifo_atomic.h"
-#include "gtest/gtest.h"
 #include <thread>
 #include <chrono>
-
+#include <vector>
 
 constexpr uint32_t  tstSize = 1024;
 
@@ -46,7 +45,7 @@ void fifo_rd_thread(T& ff)
             std::this_thread::yield();
             uint32_t out = ff.getOut();
             ff.pop();
-            EXPECT_EQ(out, testData[cnt]);
+            CHECK_EQ(out, testData[cnt]);
             ++cnt;
         }
 //        std::this_thread::sleep_for(std::chrono::microseconds(std::rand() / 10));
@@ -55,7 +54,7 @@ void fifo_rd_thread(T& ff)
 
 
 //----------------------------------------------------
-TEST(fifo, fifo_parallel)
+TEST_CASE("fifo , fifo_parallel")
 {
     std::srand(1234);
 
@@ -73,7 +72,7 @@ TEST(fifo, fifo_parallel)
 
 
 //----------------------------------------------------
-TEST(fifo, fifo_parallel_atomic)
+TEST_CASE("fifo, fifo_parallel_atomic")
 {
     std::srand(1234);
 

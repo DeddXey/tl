@@ -1,37 +1,37 @@
+#include "doctest.h"
 #include "floatstatic.h"
 
 #include <iostream>
-#include <gtest/gtest.h>
+#include "utility.h"
 
 
-
-TEST(Qnumber, makeFloatStatic)
+TEST_CASE("Qnumber, makeFloatStatic")
 {
     auto a = makeFloatStatic<int16_t, 12>(-4095);
-    EXPECT_DOUBLE_EQ(-4095, toDouble(a));
+    CHECK(isFloatingSame(-4095, toDouble(a)));
 }
 
-TEST(Qnumber, directInit)
+TEST_CASE("Qnumber, directInit")
 {
     FloatStatic<int16_t, -9> b;
     b.fraction = 4096;
-    EXPECT_DOUBLE_EQ(8, toDouble(b));
+    CHECK(isFloatingSame(8, toDouble(b)));
 }
 
-TEST(Qnumber, addition)
+TEST_CASE("Qnumber, addition")
 {
     auto a = makeFloatStatic<int16_t, 12>(-4095);
     auto b = makeFloatStatic<int16_t, 12>(356);
 
-    EXPECT_DOUBLE_EQ(-3739, toDouble(a + b));
+    CHECK(isFloatingSame(-3739, toDouble(a + b)));
 }
 
-TEST(Qnumber, substraction)
+TEST_CASE("Qnumber, substraction")
 {
     auto a = makeFloatStatic<int16_t, 12>(-4095);
     auto b = makeFloatStatic<int16_t, 12>(356);
 
     auto result = (a - b);
 
-    EXPECT_DOUBLE_EQ(-4451, toDouble(result));
+    CHECK(isFloatingSame(-4451, toDouble(result)));
 }

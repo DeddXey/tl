@@ -3,6 +3,7 @@
 /// \file
 #include <array>
 #include <cstdint>
+#include <cmath>
 
 #include "tlcfg.h"
 
@@ -249,5 +250,14 @@ constexpr std::array<uint8_t, n2TBufferSize> num2Array(const T number,
 
 
 }
+
+// TODO: floating point compare function
+template<typename F, typename D>
+bool isFloatingSame(F f, D d)
+{
+    constexpr F epsilon = 1e-10;
+        return ((fabs(f - d) < epsilon));
+}
+
 
 #endif // UTILITY_H
