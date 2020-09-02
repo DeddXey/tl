@@ -18,7 +18,7 @@ enable_testing()
 add_subdirectory(doctest)
 add_subdirectory(tests)
 add_subdirectory(tl)
-add_subdirectory(dbg)
+#add_subdirectory(dbg)
 
 #set(DOXYGEN_RECURSIVE YES)
 #set(DOXYGEN_EXCLUDE_PATTERNS
