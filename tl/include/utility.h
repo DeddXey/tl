@@ -10,7 +10,7 @@
 #ifdef __GNUC__
 #define NOP asm ("nop")
 #else
-#define NOP __asm {nop}
+#define NOP
 #endif
 
 /// \defgroup reg_manip Register manipulations
