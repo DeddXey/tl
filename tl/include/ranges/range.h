@@ -13,31 +13,31 @@ class Range {
 
 public:
 
-    Range(I1 begin, I2 end) :
+    constexpr Range(I1 begin, I2 end) noexcept :
         begin_(begin), end_(end) {}
 
-    Range(const Range& r) :
-        begin_(r.begin_),
-        end_(r.end_)
-    {
+//  constexpr Range(const Range& r) noexcept :
+//        begin_(r.begin_),
+//        end_(r.end_)
+//    {
+//
+//    }
+//
+//
+//  constexpr Range(Range&& r) noexcept :
+//        begin_(std::move(r.begin_)),
+//        end_(std::move(r.end_))
+//    {
+//
+//    }
 
-    }
-
-
-    Range(Range&& r) :
-        begin_(std::move(r.begin_)),
-        end_(std::move(r.end_))
-    {
-
-    }
-
-    constexpr auto begin() const { return begin_; }
-    constexpr auto end() const { return end_; }
+    constexpr auto begin() const noexcept { return begin_; }
+    constexpr auto end() const noexcept { return end_; }
 
 };
 
 template <typename T>
-auto makeRange(T& collection)
+constexpr auto makeRange(T& collection) noexcept
 {
     return Range<decltype (collection.begin()),
             decltype (collection.end())>
@@ -45,7 +45,7 @@ auto makeRange(T& collection)
 }
 
 template< class T, std::size_t N >
-auto makeRange( T (&array)[N] ) noexcept
+constexpr auto makeRange( T (&array)[N] ) noexcept
 {
     return Range<T*, T*>(array, array + N);
 }
@@ -54,10 +54,8 @@ auto makeRange( T (&array)[N] ) noexcept
 class IteratorStencil {};
 
 
-
-
 template <typename Rng, typename F>
-auto operator|(Rng&& rng, F&& c) -> decltype(c(std::forward<Rng>(rng)))
+constexpr auto operator|(Rng&& rng, F&& c) -> decltype(c(std::forward<Rng>(rng)))
 {
     return c(std::forward<Rng>(rng));
 }
