@@ -7,10 +7,12 @@
 #include <span>
 #include <utility>
 
+namespace tl {
+///
+/// \tparam It
 template<typename It>
 class Adc24ToInt32Iterator
 {
-
   It it;
 
 public:
@@ -19,50 +21,52 @@ public:
   using difference_type   = ptrdiff_t;
   using reference         = uint16_t &;
 
-  constexpr Adc24ToInt32Iterator(It iterator) noexcept :
-    it(iterator){};
+  ///
+  /// \param iterator
+  constexpr Adc24ToInt32Iterator(It iterator) noexcept : it(iterator){};
 
-  constexpr Adc24ToInt32Iterator(const Adc24ToInt32Iterator &other) noexcept
+  ///
+  constexpr int32_t operator*() const noexcept
   {
-    it = other.it;
+    return *(it) << 24 | (*(it + 1) << 16) | (*(it + 2) << 8);
   }
 
-  constexpr Adc24ToInt32Iterator(Adc24ToInt32Iterator &&other) noexcept :
-    it(std::move(other.it))
-  {
-  }
-
-  constexpr int32_t operator*() const  noexcept
-  {
-    int32_t tmp = *(it) << 24 | (*(it + 1) << 16) | (*(it + 2) << 8);
-    return tmp;
-  }
-
+  ///
+  /// \return
   constexpr Adc24ToInt32Iterator &operator++() noexcept
   {
     it += 3;
     return *this;
   }
 
+  ///
+  /// \return
   constexpr Adc24ToInt32Iterator operator++(int) noexcept
   {
-    Adc24ToInt32Iterator tmp(*this);
-                         operator++();
+    const Adc24ToInt32Iterator tmp(*this);
+                               operator++();
     return tmp;
   }
 
+  ///
+  /// \param other
+  /// \return
   constexpr bool operator!=(const Adc24ToInt32Iterator &other) const noexcept
   {
     return (this->it != other.it);
   }
 
+  ///
+  /// \param other
+  /// \return
   constexpr bool operator==(const Adc24ToInt32Iterator &other) const noexcept
   {
     return (!(*this != other));
   }
 };
 
-// template<typename R>
+///
+/// \return
 constexpr auto adc24ToInt32() noexcept
 {
   auto ret = [](auto ran) {
@@ -77,5 +81,6 @@ constexpr auto adc24ToInt32() noexcept
 
   return ret;
 }
+} // namespace tl
 
 #endif // ADC24TOINT32ITERATOR_H
