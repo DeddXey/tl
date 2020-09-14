@@ -17,32 +17,35 @@ class Range
   I2 end_;
 
 public:
-  ///
-  /// \param begin
-  /// \param end
-  constexpr Range(I1 begin, I2 end) noexcept : begin_(begin), end_(end) {}
+  /// \brief Construct from two iterators
+  /// \param begin begin iterator
+  /// \param end end iterator
+  constexpr Range(const I1 begin, const I2 end) noexcept :
+    begin_(begin), end_(end)
+  {
+  }
 
-  ///
-  /// \return
+  /// \brief Get begin iterator
+  /// \return begin iterator
   constexpr auto begin() const noexcept
   {
     return begin_;
   }
 
-  ///
-  /// \return
+  /// \brief Get end iterator
+  /// \return end iterator
   constexpr auto end() const noexcept
   {
     return end_;
   }
 };
 
-///
-/// \tparam T
+/// \brief Make Range from any collection
+/// \tparam T the type of collection
 /// \param collection
-/// \return
+/// \return new collection
 template<typename T>
-constexpr auto makeRange(T &collection) noexcept
+constexpr auto makeRange(const T &collection) noexcept
 {
   return Range<decltype(collection.begin()), decltype(collection.end())>(
     collection.begin(),
