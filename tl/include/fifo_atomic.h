@@ -9,44 +9,47 @@ template<typename T, uint32_t sz>
 class FifoAtomic
 {
 
-  uint32_t writeIndex = 0;
-  uint32_t readIndex  = 0;
-  uint32_t used       = 0;
-  //  std::atomic<uint32_t>   used = 0;
-  //    std::mutex              mtx;
+  struct State
+  {
+    uint32_t writeIndex = 0;
+    uint32_t readIndex  = 0;
+    uint32_t used       = 0;
+  };
 
-public:
+  std::atomic<uint32_t> used;
+  std::atomic<uint32_t> readIndex;
+  std::atomic<uint32_t> writeIndex;
+  std::mutex            writeMutex;
+
   std::array<T, sz> data;
 
-  FifoAtomic() : writeIndex(0), readIndex(0), used(0)
-  {
-    clear();
-  }
+public:
+  FifoAtomic() {}
 
   //------------------------------------------------------------------------
   void clear()
   {
-    //        std::lock_guard<std::mutex> lg(mtx);
-    writeIndex = readIndex = 0;
-    used                   = 0;
+    used.store(0, std::memory_order_release);
+    readIndex.store(0, std::memory_order_release);
+    writeIndex.store(0, std::memory_order_release);
   }
 
   //------------------------------------------------------------------------
   bool empty() const
   {
-    return (used == 0);
+    return (used.load(std::memory_order_acquire) == 0);
   }
 
   //------------------------------------------------------------------------
   bool full() const
   {
-    return (used == sz);
+    return (used.load(std::memory_order_acquire) == sz);
   }
 
   //------------------------------------------------------------------------
   uint32_t size() const
   {
-    return (sz - used);
+    return (sz - used.load(std::memory_order_acquire));
   }
 
   //------------------------------------------------------------------------
@@ -58,7 +61,25 @@ public:
   //------------------------------------------------------------------------
   bool push(const T /*&*/ value)
   {
-    //        std::lock_guard<std::mutex> lg(mtx);
+
+    uint32_t us = used.load(std::memory_order_relaxed);
+
+    if (used < sz) {
+
+      uint32_t wr = writeIndex.fetch_add(1, std::memory_order_relaxed);
+
+      auto res = used.compare_exchange_strong(us,
+                                              us + 1,
+                                              std::memory_order_release,
+                                              std::memory_order_relaxed);
+    }
+    else {
+      return false;
+    }
+
+    uint32_t wrIn = writeIndex.fetch_add(1, std::memory_order_acquire);
+
+    wrIn = (wrIn + 1) % sz;
 
     bool out = true;
     if (used != sz) {
