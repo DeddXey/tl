@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required(VERSION 3.8)
 
 project(tl)
 
@@ -8,15 +8,18 @@ project(tl)
 
 
 option(
-  gtest_force_shared_crt
-  "Use shared (DLL) run-time lib even when Google Test is built as static lib."
-  ON)
+        gtest_force_shared_crt
+        "Use shared (DLL) run-time lib even when Google Test is built as static lib."
+        ON)
 
 enable_testing()
 
+option(WITH_DOCTEST "Complile with doctest tests" OFF)
 
-add_subdirectory(doctest)
-add_subdirectory(tests)
+if (WITH_DOCTEST)
+    add_subdirectory(doctest)
+    add_subdirectory(tests)
+endif ()
 add_subdirectory(tl)
 #add_subdirectory(dbg)
 
