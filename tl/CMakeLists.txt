@@ -9,7 +9,7 @@ project(tl)
 	
 add_library(tl STATIC 
 ${SRC}
-)
+        include/sort/qsort.h)
 
 target_include_directories (tl PUBLIC
     "include"

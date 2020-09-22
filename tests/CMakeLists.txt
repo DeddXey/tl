@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 3.12)
 
 project(tests)
 
-add_executable(tests)
+add_executable(tests sort_tst.cpp)
 
 target_sources(tests
     PRIVATE tests

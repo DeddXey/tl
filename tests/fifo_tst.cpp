@@ -103,20 +103,20 @@ void fifo_rd_thread(T &ff)
 //  rx.join();
 //}
 
-//----------------------------------------------------
-TEST_CASE("fifo, fifo_parallel_atomic")
-{
-  //  std::srand(1234);
-  //
-  //  for (auto i = 0U; i < tstSize; ++i)
-  //    //        testData.push_back(std::rand());
-  //    testData.push_back(i);
-
-  std::thread tx0(fifo_wr_thread0<FifoTypeAtomic>, std::ref(ffa));
-  std::thread tx1(fifo_wr_thread1<FifoTypeAtomic>, std::ref(ffa));
-  std::thread rx(fifo_rd_thread<FifoTypeAtomic>, std::ref(ffa));
-
-  tx0.join();
-  tx1.join();
-  rx.join();
-}
+////----------------------------------------------------
+//TEST_CASE("fifo, fifo_parallel_atomic")
+//{
+//  //  std::srand(1234);
+//  //
+//  //  for (auto i = 0U; i < tstSize; ++i)
+//  //    //        testData.push_back(std::rand());
+//  //    testData.push_back(i);
+//
+//  std::thread tx0(fifo_wr_thread0<FifoTypeAtomic>, std::ref(ffa));
+//  std::thread tx1(fifo_wr_thread1<FifoTypeAtomic>, std::ref(ffa));
+//  std::thread rx(fifo_rd_thread<FifoTypeAtomic>, std::ref(ffa));
+//
+//  tx0.join();
+//  tx1.join();
+//  rx.join();
+//}

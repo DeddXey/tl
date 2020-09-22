@@ -4,7 +4,7 @@
 
 
 //----------------------------------------------------
-TEST_CASE ("Utility::isFloatingSame") {
+TEST_CASE ("utility::isFloatingSame") {
 
 
             CHECK(isFloatingSame(1.0f / 3.0f, 2.0f / 6.0f));
