@@ -1,0 +1,47 @@
+include("target.cmake")
+
+set (TOOLCHAIN_PREFIX "e:/arm9" )
+set (TARGET_TRIPLET "arm-none-eabi" CACHE STRING "")
+if (WIN32)
+    set (POSTFIX ".exe" CACHE STRING "")
+else()
+    set (POSTFIX "" CACHE STRING "")
+endif (WIN32)
+
+set (TOOLCHAIN_BIN_DIR ${TOOLCHAIN_PREFIX}/bin)
+set (TOOLCHAIN_INC_DIR ${TOOLCHAIN_PREFIX}/${TARGET_TRIPLET}/include)
+set (TOOLCHAIN_LIB_DIR ${TOOLCHAIN_PREFIX}/${TARGET_TRIPLET}/lib)
+
+#include(CMakeForceCompiler)
+set(CMAKE_CROSSCOMPILING TRUE)
+set (CMAKE_SYSTEM_NAME Generic)
+set (CMAKE_SYSTEM_PROCESSOR arm)
+
+#cmake_c_compiler ("${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-gcc${POSTFIX}" GNU)
+#cmake_cxx_compiler ("${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-gcc${POSTFIX}" GNU)
+set (CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN "${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-gcc${POSTFIX}")
+set (CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN "${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-gcc${POSTFIX}")
+
+set (CMAKE_ASM_COMPILER "${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-as${POSTFIX}")
+set (CMAKE_ASM-ATT_COMPILER "${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-as${POSTFIX}")
+set (CMAKE_OBJCOPY ${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-objcopy${POSTFIX})
+set (CMAKE_OBJDUMP ${TOOLCHAIN_BIN_DIR}/${TARGET_TRIPLET}-objdump${POSTFIX})
+set (CMAKE_C_FLAGS "-std=gnu99 -fdata-sections -ffunction-sections -Wall" CACHE INTERNAL "c compiler flags")
+set (CMAKE_CXX_FLAGS "-std=c++11 -Wall -fdata-sections -ffunction-sections -MD -Wall" CACHE INTERNAL "cxx compiler flags")
+set (CMAKE_EXE_LINKER_FLAGS "-T ${LINKER_SCRIPT} -Wl,--gc-sections" CACHE INTERNAL "exe link flags")
+set (CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")
+set (CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS "")
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+#include_directories(${SUPPORT_FILES})
+##link_directories(${SUPPORT_FILES})
+##add_definitions(-D${DEVICE})
+##include_directories("${CUBE_ROOT}/Drivers/STM32F0xx_HAL_Driver/Inc/")
+##include_directories("${CUBE_ROOT}/Drivers/CMSIS/Device/ST/STM32F0xx/Include/")
+##include_directories("${CUBE_ROOT}/Drivers/CMSIS/Include/")
+##
+##enable_language (ASM-ATT)

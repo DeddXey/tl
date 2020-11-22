@@ -1,0 +1,5 @@
+set (CHIP "stm32f429")
+set (BOARD "INTRASCOPE_V4")
+set (CORTEX 4)
+set (FPU 1)
+set (TMPREFIX "tm")
