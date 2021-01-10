@@ -1,5 +1,5 @@
-#ifndef UTILITY_H
-#define UTILITY_H
+#ifndef _UTILITY_H
+#define _UTILITY_H
 /// \file
 #include <array>
 #include <cstdint>
@@ -112,6 +112,7 @@ constexpr void setRegister(volatile uint32_t& reg,
 /// bitfield. It should be the array length of two. The first element is the
 /// offset of the bitfield and the second element is it's width
 /// \return the value of the field
+//TODO: add several fields
 template<typename T>
 constexpr uint32_t getRegField(volatile uint32_t& reg,
                                const T field)
