@@ -121,6 +121,22 @@ constexpr uint32_t getRegField(volatile uint32_t& reg,
     return ((reg & mask) >> field[0]);
 }
 
+
+template<typename ...T>
+constexpr bool isRegFieldsSet(volatile uint32_t& reg,
+                              const T... fields)
+{
+  auto l =[](auto f) {
+    return ((1 << f[1]) - 1) << f[0];
+  };
+
+
+  uint32_t mask = (l(fields) | ...); // TODO: optimize?
+  return (reg & mask);
+}
+
+
+
 ///
 /// \brief Converts the pointer to ADC buffer (24 bits MSB first) to int32
 /// \param ptr pointer  to buffer
