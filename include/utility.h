@@ -276,5 +276,6 @@ bool isFloatingSame(F f, D d)
         return ((fabs(f - d) < epsilon));
 }
 
+void simpleDelay(volatile uint32_t delay); // noinline НЕ ТРОГАТЬ!
 
 #endif // UTILITY_H

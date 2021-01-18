@@ -81,7 +81,7 @@ class Cycler {
 	volatile uint8_t	writeIndex = 0;
 	volatile uint8_t	readIndex = 0;
 
-	SyncCounter<uint8_t>		used;
+	std_atomic<uint8_t>		used; //TODO: to atomic
 //	int used;
 
 public:

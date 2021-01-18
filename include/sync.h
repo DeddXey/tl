@@ -2,12 +2,28 @@
 #define SYNC_H
 
 #include "instructions.h"
+#include <atomic>
 
-#warning To atomic
+namespace tl{
+//TODO: make usable
+class atomic_mutex {
+  std::atomic_flag flag{ATOMIC_FLAG_INIT};
 
+public:
+  void lock()
+  {
+    while (flag.test_and_set());
+  }
+
+  void unlock()
+  {
+    flag.clear();
+  }
+};
+}
 
 template <typename T=uint8_t>
-class SyncCounter {
+ class [[deprecated]] SyncCounter  {
 
 	T value;
 public:
