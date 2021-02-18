@@ -4,98 +4,87 @@
 #include "instructions.h"
 #include <atomic>
 
-namespace tl{
-//TODO: make usable
-class atomic_mutex {
-  std::atomic_flag flag{ATOMIC_FLAG_INIT};
+namespace tl {
+// TODO: make usable
+class atomic_mutex
+{
+  std::atomic_flag flag{ ATOMIC_FLAG_INIT };
 
 public:
   void lock()
   {
-    while (flag.test_and_set());
+    while (flag.test_and_set(std::memory_order_acquire))
+      ;
   }
 
   void unlock()
   {
-    flag.clear();
+    flag.clear(std::memory_order_release);
   }
 };
-}
+} // namespace tl
 
-template <typename T=uint8_t>
- class [[deprecated]] SyncCounter  {
+template<typename T = uint8_t>
+class SyncCounter
+{
 
-	T value;
+  std::atomic<T> value;
+
 public:
-	SyncCounter() : value{0} {}
+  SyncCounter() : value{ 0 } {}
 
-	//------------------------------------------------------------------------
-	T get()
-	{
-		cpu::dmb();
-		return value;
-	}
+  //------------------------------------------------------------------------
+  T get()
+  {
+    return value.load();
+  }
 
-	//------------------------------------------------------------------------
-	void set(T val)
-	{
-		T oldValue;
-		do {
-			oldValue = cpu::ldrex(&value);
-		}while (cpu::strex(val, &value));
-		cpu::dmb();
-	}
+  //------------------------------------------------------------------------
+  void set(T val)
+  {
+    value.store(val);
+  }
 
-	//------------------------------------------------------------------------
-	SyncCounter<T>& operator++()
-	{
-		T oldValue;
-		do {
-			oldValue = cpu::ldrex(&value) + 1;
-		}while (cpu::strex(oldValue, &value));
-		cpu::dmb();
+  //------------------------------------------------------------------------
+  auto operator++()
+  {
+    return value++;
+  }
 
-		return *this;
-	}
+  //------------------------------------------------------------------------
+  void incMax(T max)
+  {
+    T oldValue;
+    do {
+      oldValue = value.load(std::memory_order_relaxed);
+      if (oldValue == max)
+        break;
+    } while (!value.compare_exchange_weak(oldValue,
+                                          oldValue + 1,
+                                          std::memory_order_release,
+                                          std::memory_order_relaxed));
+  }
 
-	//------------------------------------------------------------------------
-	void incMax(T max)
-	{
-		T oldValue;
-		do {
-			oldValue = cpu::ldrex(&value);
-			if (oldValue < max)
-				++oldValue;
-		}while (cpu::strex(oldValue, &value));
-		cpu::dmb();
-	}
+  //------------------------------------------------------------------------
+  auto &operator--()
+  {
+    return value--;
+  }
 
-	//------------------------------------------------------------------------
-	SyncCounter<T>& operator--()
-	{
-		T oldValue;
-		do {
-			oldValue = cpu::ldrex(&value) - 1;
-		}while (cpu::strex(oldValue, &value));
-		cpu::dmb();
+  //------------------------------------------------------------------------
+  void decMin(T min)
+  {
+    T oldValue;
+    do {
+      oldValue = value.load(std::memory_order_relaxed);
+      if (oldValue == min)
+        break;
+    } while (!value.compare_exchange_weak(oldValue,
+                                          oldValue -1 1,
+                                          std::memory_order_release,
+                                          std::memory_order_relaxed));
+  }
 
-		return *this;
-	}
-
-	//------------------------------------------------------------------------
-	void decMin(T min)
-	{
-		T oldValue;
-		do {
-			oldValue = cpu::ldrex(&value);
-			if (oldValue < min)
-				--oldValue;
-		}while (cpu::strex(oldValue, &value));
-		cpu::dmb();
-	}
 };
-
-
-
 
 #endif // SYNC_H
