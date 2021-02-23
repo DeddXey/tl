@@ -1,12 +1,14 @@
 #ifndef SYNC_H
 #define SYNC_H
 
-#include "instructions.h"
 #include <atomic>
+#include <mutex>
+
+
 
 namespace tl {
 // TODO: make usable
-class atomic_mutex
+class spinlock_mutex
 {
   std::atomic_flag flag{ ATOMIC_FLAG_INIT };
 
@@ -22,7 +24,10 @@ public:
     flag.clear(std::memory_order_release);
   }
 };
-} // namespace tl
+
+using lock_guard = std::lock_guard<spinlock_mutex>;
+
+
 
 template<typename T = uint8_t>
 class SyncCounter
@@ -86,5 +91,6 @@ public:
   }
 
 };
+} // namespace tl
 
 #endif // SYNC_H

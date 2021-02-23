@@ -13,6 +13,7 @@ class CycleBuffer {
 	T data [num][size];
 	volatile uint8_t	writeIndex = 0;
 	volatile uint8_t	readIndex = 0;
+	tl::spinlock_mutex  mutex;
 
 	SyncCounter<uint8_t>		used;
 
@@ -26,6 +27,7 @@ public:
 	//........................................................................
 	void resetAndWrite()
 	{
+	    tl::lock_guard lg(mutex);
 		writeIndex = 0;
 		readIndex = 0;
 		used.set(0);
@@ -39,6 +41,7 @@ public:
 	//........................................................................
 	T* nextWrite()
 	{
+        tl::lock_guard lg(mutex);
 		if (used.get() == num)
 			return nullptr;
 
@@ -56,6 +59,7 @@ public:
 	//........................................................................
 	T* nextRead()
 	{
+        tl::lock_guard lg(mutex);
 		if (used.get() == 0)
 			return nullptr;
 
@@ -81,8 +85,9 @@ class Cycler {
 	volatile uint8_t	writeIndex = 0;
 	volatile uint8_t	readIndex = 0;
 
-	std_atomic<uint8_t>		used; //TODO: to atomic
-//	int used;
+//		std_atomic<uint8_t>		used; //TODO: to atomic
+    int used;
+    tl::spinlock_mutex  mutex;
 
 public:
 
@@ -94,32 +99,37 @@ public:
 	//........................................................................
 	void reset()
 	{
-		writeIndex = 0;
+        tl::lock_guard lg(mutex);
+        writeIndex = 0;
 		readIndex = 0;
 		used.set(0);
 	}
 
 	T* currentWrite()
 	{
-		return data[writeIndex];
+        tl::lock_guard lg(mutex);
+        return data[writeIndex];
 	}
 
 	//........................................................................
 	T* currentRead()
 	{
-		return data[readIndex];
+        tl::lock_guard lg(mutex);
+        return data[readIndex];
 	}
 
 	//........................................................................
 	bool isEmpty()
 	{
-		return (used.get() == 0);
+        tl::lock_guard lg(mutex);
+        return (used.get() == 0);
 	}
 
 	//........................................................................
 	T* nextWrite()
 	{
-		if (used.get() == num)
+        tl::lock_guard lg(mutex);
+        if (used.get() == num)
 			return nullptr;
 
 		uint8_t tmpIndex = writeIndex;
@@ -136,7 +146,8 @@ public:
 	//........................................................................
 	T* nextRead()
 	{
-		if (used.get() == 0)
+        tl::lock_guard lg(mutex);
+        if (used.get() == 0)
 			return nullptr;
 
 		uint8_t tmpIndex = readIndex;
