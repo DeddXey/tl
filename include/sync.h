@@ -85,7 +85,7 @@ public:
       if (oldValue == min)
         break;
     } while (!value.compare_exchange_weak(oldValue,
-                                          oldValue -1 1,
+                                          oldValue - 1,
                                           std::memory_order_release,
                                           std::memory_order_relaxed));
   }
