@@ -2,160 +2,135 @@
 #define FIFO_H
 
 //#include "dbg.h"
-//#include "rt/rtsync.h"
+#include "sync.h"
 #include <array>
 #include <mutex>
 
-
-template <typename T, uint32_t sz>
+template<typename T, uint32_t sz>
 class Fifo {
 
-	uint32_t            writeIndex = 0;
-	uint32_t            readIndex = 0;
-	uint32_t			used = 0;
-    std::mutex          mtx;
-
+    uint32_t writeIndex = 0;
+    uint32_t readIndex = 0;
+    uint32_t used = 0;
+    tl::spinlock_mutex mtx;
 
 public:
-	std::array<T, sz> data;
+    std::array<T, sz> data;
 
-	Fifo():
-	    writeIndex(0),readIndex(0),used(0)
-	{
-		clear();
-	}
+    Fifo() : writeIndex(0), readIndex(0), used(0) {
+        clear();
+    }
 
-	//------------------------------------------------------------------------
-	void clear()
-    {
-        std::lock_guard<std::mutex> lg(mtx);
-		writeIndex = readIndex = 0;
-		used = 0;
+    //------------------------------------------------------------------------
+    void clear() {
+        tl::lock_guard lg(mtx);
+        writeIndex = readIndex = 0;
+        used = 0;
+    }
 
-	}
+    //------------------------------------------------------------------------
+    bool empty() const {
+        return (used == 0);
+    }
 
-	//------------------------------------------------------------------------
-	bool empty() const
-	{
-		return (used == 0);
-	}
+    //------------------------------------------------------------------------
+    bool full() const {
+        return (used == sz);
+    }
 
-	//------------------------------------------------------------------------
-	bool full() const
-	{
-		return (used == sz);
-	}
+    //------------------------------------------------------------------------
+    uint32_t size() const {
+        return (sz - used);
+    }
 
-	//------------------------------------------------------------------------
-	uint32_t size() const
-	{
-		return (sz - used);
-	}
+    //------------------------------------------------------------------------
+    constexpr uint32_t maxsize() const {
+        return sz;
+    }
 
-	//------------------------------------------------------------------------
-	constexpr uint32_t maxsize() const
-	{
-		return sz;
-	}
+    //------------------------------------------------------------------------
+    bool push(const T /*&*/ value) {
+        tl::lock_guard lg(mtx);
 
-	//------------------------------------------------------------------------
-	bool push(const T/*&*/ value)
-	{
-        std::lock_guard<std::mutex> lg(mtx);
+        bool out = true;
+        if (used != sz) {
 
-		bool out = true;
-		if (used != sz) {
+            data[writeIndex] = value;
+            ++used;
 
-			data[writeIndex] = value;
-			++used;
+            ++writeIndex;
+            if (writeIndex == sz)
+                writeIndex = 0;
+        } else {
+            out = false;
+        }
 
-			++writeIndex;
-			if (writeIndex == sz)
-				writeIndex = 0;
+        return out;
+    }
 
-		}
-		else {
-			out = false;
-		}
+    //------------------------------------------------------------------------
+    ///
+    /// \brief Remove last read element from fifo
+    ///
+    void pop() {
+        tl::lock_guard lg(mtx);
 
-		return out;
-	}
+        if (used != 0) {
+            --used;
 
-	//------------------------------------------------------------------------
-	///
-	/// \brief Remove last read element from fifo
-	///
-	void pop()
-	{
-        std::lock_guard<std::mutex> lg(mtx);
+            ++readIndex;
+            if (readIndex == sz)
+                readIndex = 0;
+        }
+    }
 
-		if (used != 0) {
-			--used;
+    //------------------------------------------------------------------------
+    const T &getOut() const {
+        return data[readIndex];
+    }
 
-			++readIndex;
-			if (readIndex == sz)
-				readIndex = 0;
-		}
-	}
+    //------------------------------------------------------------------------
+    uint32_t getReadIndex() {
+        return readIndex;
+    }
 
-	//------------------------------------------------------------------------
-	const T& getOut() const
-	{
-		return data[readIndex];
-	}
+    //------------------------------------------------------------------------
+    uint32_t getWriteIndex() {
+        return writeIndex;
+    }
 
-	//------------------------------------------------------------------------
-	uint32_t getReadIndex()
-	{
-		return readIndex;
-	}
+    //------------------------------------------------------------------------
+    uint32_t getUsed() {
+        return used;
+    }
 
-	//------------------------------------------------------------------------
-	uint32_t getWriteIndex()
-	{
-		return writeIndex;
-	}
+    //------------------------------------------------------------------------
+    ///
+    /// \brief Get fifo element to write
+    /// \return ref to  element
+    ///
+    T &asyncGetToWrite() {
+        return data[writeIndex];
+    }
 
-	//------------------------------------------------------------------------
-	uint32_t getUsed()
-	{
-		return used;
-	}
+    //------------------------------------------------------------------------
+    ///
+    /// \brief Write complete
+    /// \return ref to new write element
+    ///
+    T &asyncWritten() {
+        tl::lock_guard lg(mtx);
 
-	//------------------------------------------------------------------------
-	///
-	/// \brief Get fifo element to write
-	/// \return ref to  element
-	///
-	T& asyncGetToWrite()
-	{
-		return data[writeIndex];
-	}
+        if (used != sz - 1) {
+            ++used;
 
-	//------------------------------------------------------------------------
-	///
-	/// \brief Write complete
-	/// \return ref to new write element
-	///
-	T& asyncWritten()
-	{
-        std::lock_guard lg(mtx);
+            ++writeIndex;
+            if (writeIndex == sz)
+                writeIndex = 0;
+        }
 
-		if (used != sz-1) {
-			++used;
-
-			++writeIndex;
-			if (writeIndex == sz)
-				writeIndex = 0;
-		}
-
-		return data[writeIndex];
-	}
-
+        return data[writeIndex];
+    }
 };
-
-
-
-
 
 #endif // FIFO_H
