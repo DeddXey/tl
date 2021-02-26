@@ -102,7 +102,7 @@ namespace tl {
 /// \return filled word
     template<typename T, typename V, typename... Args>
     constexpr uint32_t setMasks(const T field,
-                                const V val,
+                                [[maybe_unused]] const V val,
                                 Args... args) {
         return (((1 << field[1]) - 1) << (field[0]) | setMasks(args...));
     }
