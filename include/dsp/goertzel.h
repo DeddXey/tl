@@ -87,65 +87,148 @@ struct GoertzelT {
     }
 };
 
+template<typename T=float>
 class GoertzelD {
 
-	constexpr static float cPi = 3.14159265f;
-	float tone;
-	float sample;
+	constexpr static T cPi = 3.14159265f;
+  T tone;
+  T sample;
 	uint32_t N;
 
-	float z1 { 0.0f };
-	float z2 { 0.0f };
+  T z1 { 0.0f };
+  T z2 { 0.0f };
 	uint32_t counter;
 
-	float omega;
-	float alpha;
-	float scale;
-	float k;
+  T omega;
+  T alpha;
+  T scale;
+  T k;
 
-	float cr;
-	float ci;
+  T cr;
+  T ci;
 
 	//cplx out;
 
-	void recalc();
+  void recalc()
+  {
+    counter = N -1;
+//    counter = N;
+    z1 = 0.0F;
+    z2 = 0.0F;
+    k = tone * (N) / sample;
+    omega = 2.0F * cPi * k / N;
+    alpha = 2.0F * cosf(omega);
+    scale = N / 2.0F;
+    cr = cosf(omega);
+    ci =  sinf(omega);
+    ri = 0.0F;
+    rr = 0.0F;
+  }
 
 
 public:
 
-	float rr {0.0f};
-	float ri {0.0f};
+  T rr {0.0f};
+  T ri {0.0f};
 
-	GoertzelD();
+	GoertzelD():
+    tone(0),
+    sample(0),
+    N(0)
+  {
+    recalc();
+  }
 
 	GoertzelD(const uint32_t num,
 	          const uint32_t fSample,
-	          const uint32_t fTone);
+	          const uint32_t fTone):
+    tone(fTone),
+    sample(fSample),
+    N(num)
+  {
+    recalc();
+  }
 
 	void config(const uint32_t num,
 	            const uint32_t fSample,
-	            const uint32_t fTone);
+	            const uint32_t fTone)
+  {
+    tone = fTone;
+    N = num;
+    sample = fSample;
+    recalc();
+  }
 
-	void setBin(const uint32_t fTone);
-	void setNum(const uint32_t num);
-	void setSampleRate(const uint32_t fSample);
+
+  void setBin(const uint32_t fTone)
+  {
+    tone = fTone;
+    recalc();
+  }
+
+	void setNum(const uint32_t num)
+  {
+    N = num;
+    recalc();
+  }
+
+	void setSampleRate(const uint32_t fSample)
+  {
+    sample = fSample;
+    recalc();
+  }
 
 	///
 	/// \brief Add next sample to algorithm
 	/// \param sample
 	/// \return true result is ready false not yet
 	///
-	bool addSample(float sample);
+	bool addSample(float sample)
+  {
+//    Gpio<'F'>::setPin(0);
+    float adder = sample + z1 * alpha - z2;
+
+    if (!counter ) {
+      rr = (adder * cr - z1) / scale;
+      ri = (adder * ci) / scale;
+      z2 = z1 = 0;
+      counter = N - 1;
+//        counter = N;
+
+//        Gpio<'F'>::resetPin(0);
+      return true;
+    }
+
+    z2 = z1;
+    z1 = adder;
+    --counter;
+
+//    Gpio<'F'>::resetPin(0);
+    return false;
+  }
+
 
 	///
 	/// \brief Получение значения бина
 	/// \return комплексное значение бина
 	///
-	float getBinAmpl()  const;
+	float getBinAmpl()  const
+  {
+    return sqrtf(rr * rr + ri * ri);
 
-	double getBinPhase() const;
+  }
 
-	void init();
+	double getBinPhase() const
+  {
+    return atan2f(ri,  rr);
+  }
+
+	void init()
+  {
+    z1 = z2 = 0.0F;
+    counter = N - 1;
+//    counter = N;
+  }
 };
 
 

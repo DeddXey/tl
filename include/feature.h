@@ -8,7 +8,7 @@
 
 
 template <typename TR>
-void printTypeName(UNUSED TR t)
+void printTypeName([[maybe_unused]] TR t)
 {
     if (std::is_const<TR>::value)
         con.debug() << "const ";
@@ -47,7 +47,7 @@ constexpr InitArray<EpType, sizeof... (ints)> initArrayMembersConstImpl(I&& val,
                                                                         std::integer_sequence<S, ints...>)
 {
     static_assert(std::is_lvalue_reference<decltype (val)>::value, "no lvalue");
-    auto l = [](auto&& a, UNUSED auto b)
+    auto l = [](auto&& a, [[maybe_unused]] auto b)
     {
         static_assert(std::is_lvalue_reference<decltype (a)>::value, "no lvalue");
         return EpType(std::forward<I>(a));

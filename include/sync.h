@@ -3,7 +3,7 @@
 
 #include <atomic>
 #include <mutex>
-
+#include "instructions.h"
 
 
 namespace tl {
@@ -25,6 +25,18 @@ public:
   }
 };
 
+class critical_section {
+public:
+  critical_section()
+  {
+    cpu::cpsid();
+  }
+
+  ~critical_section()
+  {
+    cpu::cpsie();
+  }
+};
 using lock_guard = std::lock_guard<spinlock_mutex>;
 
 

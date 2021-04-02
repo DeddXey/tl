@@ -1,12 +1,14 @@
 #include "utility.h"
+namespace tl {
 
 void simpleDelay(volatile uint32_t delay) // noinline НЕ ТРОГАТЬ!
 {
-    for (volatile uint32_t i = 0; i < delay; ++i) {
-        NOP; // чтобы оптимизатор не оптимизировал
-    }
+  for (volatile uint32_t i = 0; i < delay; ++i) {
+    NOP; // чтобы оптимизатор не оптимизировал
+  }
 }
 
+}
 ////---------------------------------------------------------------------------
 //uint8_t hexLetterToByte(const uint8_t letter)
 //{

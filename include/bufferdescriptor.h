@@ -75,31 +75,24 @@ public:
 };
 
 //----------------------------------------------------------------------------
-template <typename T, typename S>
-LogStream<T, true>& operator<<(LogStream<T, true>& stream,
+template<typename T, typename S>
+LogStream<T, true> &operator<<(LogStream<T, true> &       stream,
                                const BufferDescriptor<S> &bd)
 {
 
-            stream << Fg::cyan
-                  << Use::hex
-                  << Use::w8
-                  << "length: "
-                  << bd.length()
-                  << ":"
-                  << bd.length() * sizeof(T) ;
+  stream << Fg::cyan << Use::hex << Use::w8 << "addr: " << (int)bd.ptr()
+         << " length: " << bd.length() << ":" << bd.length() * sizeof(T);
 
-            const auto *ptr8 = reinterpret_cast<const uint8_t*>(bd.buffer);
+  const auto *ptr8 = reinterpret_cast<const uint8_t *>(bd.buffer);
 
-            for (uint32_t i = 0 ; i  < bd.length() * sizeof (T); ++i) {
-                if (i%16 == 0)
-                    stream.putChar('\n');
+  for (uint32_t i = 0; i < bd.length() * sizeof(T); ++i) {
+    if (i % 16 == 0)
+      stream.putChar('\n');
 
-                stream << Use::w2<< ptr8[i] << " ";
-            }
-            stream << Attr::reset << Use::endl;
-            return stream;
-
+    stream << Use::w2 << ptr8[i] << " ";
+  }
+  stream << Attr::reset << Use::endl;
+  return stream;
 }
-
 
 #endif // BUFFERDESCRIPTOR_H

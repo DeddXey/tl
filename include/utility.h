@@ -47,7 +47,7 @@ namespace tl {
                                           const T pos,
                                           const Args... args) {
         return (val << ((pos & (32L / mult - 1)) * mult)) |
-               setBits(mult, val, args...);
+                setBitGroup(mult, val, args...);
     }
 
 
@@ -233,7 +233,7 @@ namespace tl {
 
 //------------------------------------------------------------------------
 ///
-/// Converts the number to the byte arrayof symbols
+/// Converts the number to the byte array of symbols
 /// \tparam T the type of the number
 /// \param number the input number
 /// \param base conversion base
@@ -281,7 +281,7 @@ namespace tl {
     }
 
 
-}
+
 
 // TODO: floating point compare function
 template<typename F, typename D>
@@ -290,8 +290,14 @@ bool isFloatingSame(F f, D d) {
     return ((fabs(f - d) < epsilon));
 }
 
-void simpleDelay(volatile uint32_t delay); // noinline НЕ ТРОГАТЬ!
 
+inline void simpleDelay(const uint32_t delay)
+{
+  for (volatile uint32_t i = 0; i < delay; ++i) {
 
+  }
+}// noinline НЕ ТРОГАТЬ!
+
+}
 
 #endif // UTILITY_H
