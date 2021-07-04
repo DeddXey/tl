@@ -6,6 +6,7 @@
 #include <array>
 #include <mutex>
 
+namespace tl {
 template<typename T, uint32_t sz>
 class Fifo
 {
@@ -148,5 +149,5 @@ public:
     return data[writeIndex];
   }
 };
-
+} // namespace tl
 #endif // FIFO_H

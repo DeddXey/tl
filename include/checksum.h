@@ -5,6 +5,7 @@
 #include <tuple>
 #include <utility>
 #include "view.h"
+#include <numeric>
 
 
 //------------------------------------------------------------------------
@@ -81,6 +82,50 @@ constexpr uint8_t Crc8(const T &c) {
     return crc;
 }
 
+std::array<uint32_t, 256> generate_crc_lookup_table() noexcept
+{
+//    auto const reversed_polynomial = uint32_t{0x04C11DB7};
+auto const reversed_polynomial = uint32_t{0xEDB88320};
+
+  // This is a function object that calculates the checksum for a value,
+  // then increments the value, starting from zero.
+  struct byte_checksum
+  {
+    uint32_t operator()() noexcept
+    {
+      auto checksum = static_cast<uint32_t>(n++);
+
+      for (auto i = 0; i < 8; ++i)
+        checksum = (checksum >> 1) ^ ((checksum & 0x1u) ? reversed_polynomial : 0);
+
+      return checksum;
+    }
+
+    unsigned n = 0;
+  };
+
+  auto table = std::array<uint32_t, 256>{};
+  std::generate(table.begin(), table.end(), byte_checksum{});
+
+  return table;
+}
+
+// Calculates the CRC for any sequence of values. (You could use type traits and a
+// static assert to ensure the values can be converted to 8 bits.)
+template <typename InputIterator>
+uint32_t crc32(InputIterator first, InputIterator last)
+{
+  // Generate lookup table only on first use then cache it - this is thread-safe.
+  static auto const table = generate_crc_lookup_table();
+
+  // Calculate the checksum - make sure to clip to 32 bits, for systems that don't
+  // have a true (fast) 32-bit type.
+  return uint32_t{0xFFFFFFFFuL} &
+         ~ std::accumulate(first, last,
+                          ~uint32_t{0} & uint32_t{0xFFFFFFFFuL},
+                          [](std::uint32_t checksum, uint8_t value)
+                          { return table[(checksum ^ value) & 0xFFu] ^ (checksum >> 8); });
+}
 
 
 

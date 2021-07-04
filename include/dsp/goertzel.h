@@ -3,6 +3,7 @@
 
 
 #include <cstdint>
+#include "gcem.hpp"
 #include <cmath>
 
 
@@ -24,17 +25,18 @@ struct GoertzelT {
 
     float z1 { 0.0f };
     float z2 { 0.0f };
-    uint32_t counter { N - 1 };
+    uint32_t counter{ N - 1 };
 
-    constexpr static float omega = 2 * cPi * k / N;
-    constexpr static float alpha = 2 * cosf(omega);
-    constexpr static float scale = N / 2;
+    constexpr static float omega = 2.0 * cPi * k / N;
+    constexpr static float ci = gcem::sin(omega);
+    constexpr static float cr = gcem::cos(omega);
+
+    constexpr static float alpha = 2.0 * cr;
+    constexpr static float scale = N / 2.0;
 
     float rr {0.0f};
     float ri {0.0f};
 
-    constexpr static float cr = cosf(omega);
-    constexpr static float ci =  sinf(omega);
 
     //cplx out;
 
@@ -68,13 +70,13 @@ struct GoertzelT {
     ///
     float getBinAmpl()
     {
-        return sqrtf(rr * rr + ri * ri);
+        return sqrt(rr * rr + ri * ri);
 
     }
 
 	double getBinPhase()
     {
-        return atan2f(ri,  rr);
+        return atan2(ri,  rr);
     }
 
     ///

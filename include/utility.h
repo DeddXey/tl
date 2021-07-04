@@ -3,7 +3,8 @@
 /// \file
 #include <array>
 #include <cstdint>
-#include <cmath>
+#include "gcem.hpp"
+#include "instructions.h"
 
 #include "tlcfg.h"
 
@@ -281,8 +282,6 @@ namespace tl {
     }
 
 
-
-
 // TODO: floating point compare function
 template<typename F, typename D>
 bool isFloatingSame(F f, D d) {
@@ -294,9 +293,16 @@ bool isFloatingSame(F f, D d) {
 inline void simpleDelay(const uint32_t delay)
 {
   for (volatile uint32_t i = 0; i < delay; ++i) {
-
+    volatile uint32_t a;
+    ++a;
+    cpu::nop();
   }
 }// noinline НЕ ТРОГАТЬ!
+
+
+template <typename T>
+uint32_t& asWord(T& what) { return *reinterpret_cast<uint32_t*>(&what); }
+
 
 }
 
