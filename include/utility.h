@@ -292,8 +292,8 @@ bool isFloatingSame(F f, D d) {
 
 inline void simpleDelay(const uint32_t delay)
 {
-  for (volatile uint32_t i = 0; i < delay; ++i) {
-    volatile uint32_t a;
+  for (uint32_t i = 0; i < delay; ++i) {
+    uint32_t a;
     ++a;
     cpu::nop();
   }
