@@ -98,6 +98,7 @@ public:
   //------------------------------------------------------------------------
   const T &getOut() const
   {
+    tl::critical_section cs;
     return data[readIndex];
   }
 
@@ -126,6 +127,7 @@ public:
   ///
   T &asyncGetToWrite()
   {
+    tl::critical_section cs;
     return data[writeIndex];
   }
 
