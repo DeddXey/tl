@@ -8,11 +8,11 @@
 
 #include "tlcfg.h"
 
-#ifdef __GNUC__
-#define NOP asm ("nop")
-#else
-#define NOP
-#endif
+//#ifdef __GNUC__
+//#define NOP_CMD asm ("nop")
+//#else
+//#define NOP
+//#endif
 
 /// \defgroup reg_manip Register manipulations
 
@@ -27,7 +27,7 @@ namespace tl {
 /// \return слово с установленной группой битов
 /// Позиция группы устанавливается так, что находится внутри 32-разрядного числа
     template<typename M, typename V, typename T>
-    constexpr static uint32_t setBitGroup(const M mult,
+    constexpr  uint32_t setBitGroup(const M mult,
                                           const V val,
                                           const T pos) {
 //    volatile uint16_t shift = ((pos & (32 / mult - 1)) * mult);
@@ -43,7 +43,7 @@ namespace tl {
 /// \return слово с установленными группами битов
 /// Позиция группы устанавливается так, что находится внутри 32-разрядного числа
     template<typename M, typename V, typename T, typename... Args>
-    constexpr static uint32_t setBitGroup(const M mult,
+    constexpr uint32_t setBitGroup(const M mult,
                                           const V val,
                                           const T pos,
                                           const Args... args) {
