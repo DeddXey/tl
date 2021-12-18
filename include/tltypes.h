@@ -19,7 +19,7 @@ public:
     TypeWrapper(TypeWrapper<T>& rhs) : value(rhs.value) {}
     TypeWrapper(TypeWrapper<T>&& lhs) noexcept : value(std::move(lhs.value))
     {}
-    ~TypeWrapper() {}
+    ~TypeWrapper() = default;
 
     T getValue() const;
     void setValue(const T &value);
@@ -37,10 +37,6 @@ T TypeWrapper<T>::getValue() const
 return value;
 }
 
-
-
-//############################################################################
-
 using Int32T = TypeWrapper<int32_t>;
 using Uint32T = TypeWrapper<uint32_t>;
 using Float = TypeWrapper<float>;
@@ -48,4 +44,4 @@ using Double = TypeWrapper<double>;
 
 }
 
-#endif // TMTYPES_H
+#endif // TLTYPES_H
