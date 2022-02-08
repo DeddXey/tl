@@ -293,9 +293,9 @@ uint32_t &asWord(T &what)
 }
 
 template<typename T, typename S=uint32_t>
-S to_index(T &what)
+S to_index(T what)
 {
-  return static_cast<S *>(&what);
+  return static_cast<S>(what);
 }
 
 
