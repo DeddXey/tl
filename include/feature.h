@@ -1,7 +1,7 @@
 #ifndef FEATURE_H
 #define FEATURE_H
 
-#include "log/log.h"
+#include "log.h"
 #include "utility.h"
 
 #include <type_traits>
