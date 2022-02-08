@@ -3,9 +3,9 @@
 
 //#include "dbg.h"
 #include <array>
-#include <optional>
 #include <atomic>
 #include <mutex>
+#include <optional>
 
 namespace tl {
 template<typename T, uint32_t sz>
@@ -19,7 +19,7 @@ class fifo_atomic
 public:
   std::array<T, sz> data;
 
-  fifo_atomic() : writeIndex(0), readIndex(0), used(0)
+  fifo_atomic() : used(0)
   {
     clear();
   }
@@ -31,22 +31,22 @@ public:
     used.store(0);
   }
 
-  bool empty() const
+  [[nodiscard]] bool empty() const
   {
     return (used.load() == 0);
   }
 
-  bool full() const
+  [[nodiscard]] bool full() const
   {
     return (used.load() == sz);
   }
 
-  uint32_t size() const
+  [[nodiscard]] uint32_t size() const
   {
     return (sz - used.load());
   }
 
-  constexpr uint32_t maxsize() const
+  [[nodiscard]] constexpr uint32_t maxsize() const
   {
     return sz;
   }
@@ -58,7 +58,7 @@ public:
       if (try_used == sz)
         return false;
 
-    } while (!used.compare_exchange_weak(try_used, try_used + 1));
+    } while (!used.compare_exchange_strong(try_used, try_used + 1));
 
     data[writeIndex] = value;
 
@@ -79,16 +79,17 @@ public:
       if (try_used == 0)
         return;
 
-    } while (!used.compare_exchange_weak(try_used, try_used - 1));
+    } while (!used.compare_exchange_strong(try_used, try_used - 1));
 
     ++readIndex;
     if (readIndex == sz)
       readIndex = 0;
   }
 
-  std::optional<const T>getOut() const
+  std::optional<const T> getOut() const
   {
-    return used.load()==0?std::nullopt:std::optional<const T>{data[readIndex]};
+    return used.load() == 0 ? std::nullopt
+                            : std::optional<const T>{ data[readIndex] };
   }
 
   uint32_t getReadIndex()
@@ -122,15 +123,20 @@ public:
   T &asyncWritten()
   {
 
-    if (used != sz - 1) {
-      ++used;
+    uint32_t try_used = used.load(std::memory_order_seq_cst);
+    do {
+      if (try_used == sz)
+        return {};
 
-      ++writeIndex;
-      if (writeIndex == sz)
-        writeIndex = 0;
-    }
+    } while (!used.compare_exchange_strong(try_used,
+                                           try_used + 1,
+                                           std::memory_order_seq_cst));
 
-    return data[writeIndex];
+    ++writeIndex;
+    if (writeIndex == sz)
+      writeIndex = 0;
+
+    return std::optional<T &>{ data[writeIndex] };
   }
 };
 } // namespace tl

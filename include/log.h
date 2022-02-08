@@ -4,6 +4,7 @@
 #include <array>
 #include <cstdint>
 
+
 /// \brief Levels of logging
 enum class LogLevel : uint8_t
 {
@@ -101,7 +102,7 @@ public:
   }
 
   template<typename B>
-  void putRawData(const B &buf, const uint16_t len)
+  void putRawData(const B &buf)
   {
     if constexpr (flag) {
       for (auto chr : buf) {
@@ -119,17 +120,28 @@ public:
   {
     this->trailing = width;
   }
+
+  void process()
+  {
+    port.irqHandler();
+  }
+
 };
 
 template<typename P, LogLevel ll = LogLevel::none>
 class LogWrapper
 {
 
-  LogStream<P, true>  logger;
-  LogStream<P, false> dumb;
+  LogStream<typename P::OutStream, true>  logger;
+  LogStream<typename P::OutStream, false> dumb;
 
 public:
   LogWrapper() = default;
+
+  void init()
+  {
+    P::init();
+  }
 
   auto &always()
   {
@@ -180,6 +192,11 @@ public:
       return dumb;
     }
   }
+
+  void process()
+  {
+    logger.process();
+  }
 };
 
 /// Color
@@ -188,7 +205,7 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const Fg val)
 {
   if constexpr (stream.enabled) {
     const uint8_t buf[]{ 27, '[', '3', static_cast<uint8_t>(val), 'm' };
-    stream.putRawData(buf, sizeof(buf));
+    stream.putRawData(buf);
   }
   return stream;
 }
@@ -198,7 +215,7 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const Bg val)
 {
   if constexpr (stream.enabled) {
     const uint8_t buf[]{ 27, '[', '4', static_cast<uint8_t>(val), 'm' };
-    stream.putRawData(buf, sizeof(buf));
+    stream.putRawData(buf);
   }
   return stream;
 }
@@ -209,7 +226,7 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const Attr val)
   if constexpr (stream.enabled) {
 
     const uint8_t buf[]{ 27, '[', static_cast<uint8_t>(val), 'm' };
-    stream.putRawData(buf, sizeof(buf));
+    stream.putRawData(buf);
   }
   return stream;
 }
@@ -301,5 +318,6 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const S val)
   }
   return stream;
 }
+
 
 #endif // LOG_H
