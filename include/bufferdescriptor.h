@@ -7,87 +7,94 @@
 #include <cstdint>
 #include <utility>
 
-//TODO: move to misc and make it template
-using BuffPair = std::pair<uint8_t*, uint32_t>;
+// TODO: move to misc and make it template
+using BuffPair = std::pair<uint8_t *, uint32_t>;
 
 ///
 /// \brief Descriptor of simple memory buffer
 ///
-template <typename M =uint8_t>
-class BufferDescriptor {
-    const M*		    buffer;
-	uint32_t        	size;
+template<typename M = uint8_t>
+class BufferDescriptor
+{
+  const M *buffer;
+  uint32_t size;
 
 public:
-    BufferDescriptor(const M* b, const uint32_t len) :
-	    buffer(b),
-	    size(len) {}
-    BufferDescriptor() = default;
+  BufferDescriptor(const M *b, const uint32_t len) : buffer(b), size(len) {}
+  BufferDescriptor() = default;
 
+  template<int N>
+  explicit BufferDescriptor(M (&array)[N]) noexcept : buffer(array), size(N)
+  {
+  }
 
-	///
-	/// \brief Get BufferDescriptor from discrete parameters
-	/// \param buf
-	/// \param len
-	///
-    void fromValues(const M* buf, const uint32_t len)
-	{
-		this->buffer = buf;
-		this->size = len;
-	}
+  ///
+  /// \brief Get BufferDescriptor from discrete parameters
+  /// \param buf
+  /// \param len
+  ///
+  void fromValues(const M *buf, const uint32_t len)
+  {
+    this->buffer = buf;
+    this->size   = len;
+  }
 
+  //	///
+  //	/// \brief Prints buffer in hexadecimal in 16 columns
+  //	///
+  //	///
+  //	template <typename D>
+  //	void print(D& debug) const
+  //	{
 
+  //        con.debug() << Fg::cyan
+  //		      << Use::hex
+  //		      << Use::w8
+  //		      << "length: "
+  //		      << length()
+  //		      << ":"
+  //		      << length() * sizeof(T) ;
 
-//	///
-//	/// \brief Prints buffer in hexadecimal in 16 columns
-//	///
-//	///
-//	template <typename D>
-//	void print(D& debug) const
-//	{
+  //		const auto *ptr8 = reinterpret_cast<const uint8_t*>(buffer);
 
-//        con.debug() << Fg::cyan
-//		      << Use::hex
-//		      << Use::w8
-//		      << "length: "
-//		      << length()
-//		      << ":"
-//		      << length() * sizeof(T) ;
+  //		for (uint32_t i = 0 ; i  < length() * sizeof (T); ++i) {
+  //			if (i%16 == 0)
+  //                con.debug().putChar('\n');
 
-//		const auto *ptr8 = reinterpret_cast<const uint8_t*>(buffer);
+  //            con.debug() << Use::w2<< ptr8[i] << " ";
+  //		}
+  //        con.debug() << Attr::reset << Use::endl;
+  //	}
 
-//		for (uint32_t i = 0 ; i  < length() * sizeof (T); ++i) {
-//			if (i%16 == 0)
-//                con.debug().putChar('\n');
+  template<typename T, typename S>
+  friend LogStream<T, true> &operator<<(LogStream<T, true>        &stream,
+                                        const BufferDescriptor<S> &bd);
 
-//            con.debug() << Use::w2<< ptr8[i] << " ";
-//		}
-//        con.debug() << Attr::reset << Use::endl;
-//	}
-
-
-    template <typename T, typename S>
-    friend LogStream<T, true>& operator<<(LogStream<T, true>& stream,
-                                   const BufferDescriptor<S> &bd);
-
-	uint32_t length() const { return size; }
-    const M* ptr() const { return buffer; }
+  [[nodiscard]] uint32_t length() const
+  {
+    return size;
+  }
+  const M *ptr() const
+  {
+    return buffer;
+  }
 };
 
 //----------------------------------------------------------------------------
 template<typename T, typename S>
-LogStream<T, true> &operator<<(LogStream<T, true> &       stream,
+LogStream<T, true> &operator<<(LogStream<T, true>        &stream,
                                const BufferDescriptor<S> &bd)
 {
 
   stream << Fg::cyan << Use::hex << Use::w8 << "addr: " << (int)bd.ptr()
-         << " length: " << bd.length() << ":" << bd.length() * sizeof(T);
+         << " length: " << bd.length() << ":" << bd.length() * sizeof(S);
 
   const auto *ptr8 = reinterpret_cast<const uint8_t *>(bd.buffer);
 
-  for (uint32_t i = 0; i < bd.length() * sizeof(T); ++i) {
-    if (i % 16 == 0)
+  for (uint32_t i = 0; i < bd.length() * sizeof(S); ++i) {
+    if (i % 16 == 0) {
       stream.putChar('\n');
+    }
 
     stream << Use::w2 << ptr8[i] << " ";
   }
