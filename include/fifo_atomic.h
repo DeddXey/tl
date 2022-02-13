@@ -15,10 +15,9 @@ class fifo_atomic
   uint32_t              writeIndex = 0;
   uint32_t              readIndex  = 0;
   std::atomic<uint32_t> used       = 0;
+  std::array<T, sz>     data;
 
 public:
-  std::array<T, sz> data;
-
   fifo_atomic() : used(0)
   {
     clear();
@@ -26,7 +25,6 @@ public:
 
   void clear()
   {
-    //    tl::critical_section cs;
     writeIndex = readIndex = 0;
     used.store(0);
   }
@@ -38,7 +36,7 @@ public:
 
   [[nodiscard]] bool full() const
   {
-    return (used.load() == sz);
+    return (used.load() == sz - 1);
   }
 
   [[nodiscard]] uint32_t size() const
@@ -55,10 +53,10 @@ public:
   {
     uint32_t try_used = used.load();
     do {
-      if (try_used == sz)
+      if (try_used == sz - 1)
         return false;
 
-    } while (!used.compare_exchange_strong(try_used, try_used + 1));
+    } while (!used.compare_exchange_weak(try_used, try_used + 1));
 
     data[writeIndex] = value;
 
@@ -79,7 +77,7 @@ public:
       if (try_used == 0)
         return;
 
-    } while (!used.compare_exchange_strong(try_used, try_used - 1));
+    } while (!used.compare_exchange_weak(try_used, try_used - 1));
 
     ++readIndex;
     if (readIndex == sz)
@@ -125,16 +123,16 @@ public:
 
     uint32_t try_used = used.load(std::memory_order_seq_cst);
     do {
-      if (try_used == sz)
+      if (try_used == sz - 1)
         return {};
 
-    } while (!used.compare_exchange_strong(try_used,
-                                           try_used + 1,
-                                           std::memory_order_seq_cst));
+    } while (!used.compare_exchange_weak(try_used,
+                                         try_used + 1));
 
     ++writeIndex;
-    if (writeIndex == sz)
+    if (writeIndex == sz) {
       writeIndex = 0;
+    }
 
     return std::optional<T &>{ data[writeIndex] };
   }
