@@ -57,7 +57,9 @@ enum class Use : uint8_t
   w0,
   w2,
   w4,
-  w8
+  w8,
+  sign,
+  unsign
 };
 
 //============================================================================
@@ -70,6 +72,8 @@ public:
 private:
   uint8_t base     = 10;
   uint8_t trailing = 0;
+  uint8_t trailing_char = ' ';
+  bool    signed_values = false;
   Port    port;
 
 public:
@@ -114,16 +118,34 @@ public:
     this->base = base;
   }
 
-  //------------------------------------------------------------------------
   void setWidth(const uint8_t width)
   {
     this->trailing = width;
   }
 
-  //------------------------------------------------------------------------
   void irqHandler()
   {
     port.irqHandler();
+  }
+
+  void set_trailing_char(uint8_t val)
+  {
+    trailing_char = val;
+  }
+
+  uint8_t get_trailing_char() const
+  {
+    return trailing_char;
+  }
+
+  void set_signed_values(bool val)
+  {
+    signed_values = val;
+  }
+
+  uint8_t get_signed_values() const
+  {
+    return signed_values;
   }
 };
 
@@ -157,36 +179,37 @@ public:
   //------------------------------------------------------------------------
   auto &error()
   {
-    if constexpr ((ll >= LogLevel::error) && flag)
+    if constexpr ((ll >= LogLevel::error) && flag) {
       return logger;
-    else
+    } else {
       return dumb;
+}
   }
 
   //------------------------------------------------------------------------
   auto &warning()
   {
-    if constexpr ((ll >= LogLevel::warning) && flag)
+    if constexpr ((ll >= LogLevel::warning) && flag) {
       return logger;
-    else
+    } else
       return dumb;
   }
 
   //------------------------------------------------------------------------
   auto &info()
   {
-    if constexpr ((ll >= LogLevel::info) && flag)
+    if constexpr ((ll >= LogLevel::info) && flag) {
       return logger;
-    else
+    } else
       return dumb;
   }
 
   //------------------------------------------------------------------------
   auto &debug()
   {
-    if constexpr ((ll >= LogLevel::debug) && flag)
+    if constexpr ((ll >= LogLevel::debug) && flag) {
       return logger;
-    else
+    } else
       return dumb;
   }
 };
@@ -252,6 +275,12 @@ LogStream<T, true> &operator<<(LogStream<T, true> &stream, Use val)
   case Use::w8:
     stream.setWidth(8);
     break;
+  case Use::sign:
+    stream.set_signed_values(true);
+    break;
+  case Use::unsign:
+    stream.set_signed_values(false);
+    break;
   }
   return stream;
 }
@@ -260,8 +289,9 @@ LogStream<T, true> &operator<<(LogStream<T, true> &stream, Use val)
 template<typename T>
 LogStream<T, true> &operator<<(LogStream<T, true> &stream, const char *val)
 {
-  while (*val)
+  while (*val) {
     stream.putChar(*val++);
+}
   return stream;
 }
 
@@ -269,7 +299,7 @@ LogStream<T, true> &operator<<(LogStream<T, true> &stream, const char *val)
 template<typename T, typename S>
 LogStream<T, true> &operator<<(LogStream<T, true> &stream, const S val)
 {
-  std::array<uint8_t, 64> buffer;
+  std::array<uint8_t, 64> buffer{};
   S                       sum = val;
 
   if constexpr (std::is_signed<S>::value) {
@@ -277,22 +307,26 @@ LogStream<T, true> &operator<<(LogStream<T, true> &stream, const S val)
       stream.putChar('-');
       sum = -sum;
     }
+    else
+    if (stream.get_signed_values()) {
+      stream.putChar(' ');
+    }
   }
 
   uint8_t i = 0;
   do {
-    int32_t digit;
-    digit = sum % stream.getBase();
-    if (digit < 0xA)
+    int32_t digit =sum % stream.getBase();
+
+    if (digit < 0xA) {
       buffer[i] = '0' + digit;
-    else
+    } else
       buffer[i] = 'A' + digit - 0xA;
     sum /= stream.getBase();
     ++i;
   } while (sum);
 
   for (int j = 0; j < stream.getTrailing() - i; ++j) {
-    stream.putChar('0');
+    stream.putChar(stream.get_trailing_char());
   }
 
   for (; i != 0; --i) {
