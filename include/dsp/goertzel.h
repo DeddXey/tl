@@ -198,6 +198,11 @@ public:
 //        counter = N;
 
 //        Gpio<'F'>::resetPin(0);
+
+
+//      rr = 4; //QWERTY
+//      ri = 5;
+
       return true;
     }
 
@@ -223,6 +228,7 @@ public:
 	double getBinPhase() const
   {
     return atan2f(ri,  rr);
+
   }
 
 	void init()
