@@ -225,6 +225,12 @@ public:
 
   }
 
+  float getBinRe()  const
+  {
+    return rr;
+
+  }
+
 	double getBinPhase() const
   {
     return atan2f(ri,  rr);
