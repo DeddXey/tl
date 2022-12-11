@@ -1,156 +1,158 @@
 #ifndef CYCLEBUFFER_H
 #define CYCLEBUFFER_H
 
-#include <cstdint>
 #include "sync.h"
+#include <cstdint>
 
 ///
 /// Потокобезопасный циклический пул буферов
 ///
-template<uint32_t size, uint8_t num, typename T= uint8_t>
-class CycleBuffer {
+template<uint32_t size, uint8_t num, typename T = uint8_t>
+class CycleBuffer
+{
 
-    T data[num][size];
-    volatile uint8_t writeIndex = 0;
-    volatile uint8_t readIndex = 0;
-    tl::spinlock_mutex mutex;
+  T                  data[num][size];
+  uint8_t            writeIndex = 0;
+  uint8_t            readIndex  = 0;
+  tl::spinlock_mutex mutex;
 
-    tl::SyncCounter<uint8_t> used;
+  tl::SyncCounter<uint8_t> used;
 
 public:
+  CycleBuffer() = default;
 
-    //........................................................................
-    CycleBuffer() :
-            writeIndex{0},
-            readIndex{0} {}
+  void resetAndWrite()
+  {
+    tl::lock_guard lock_guard(mutex);
+    writeIndex = 0;
+    readIndex  = 0;
+    used.set(0);
+  }
 
-    //........................................................................
-    void resetAndWrite() {
-        tl::lock_guard lg(mutex);
-        writeIndex = 0;
-        readIndex = 0;
-        used.set(0);
+  T *currentWrite()
+  {
+    return data[0];
+  }
+
+  T *nextWrite()
+  {
+    tl::lock_guard lock_guard(mutex);
+    if (used.get() == num) {
+      return nullptr;
     }
 
-    T *currentWrite() {
-        return data[0];
+    uint8_t tmpIndex = writeIndex;
+
+    used.decMin(0);
+
+    ++writeIndex;
+    if (writeIndex == num) {
+      writeIndex = 0;
     }
 
-    //........................................................................
-    T *nextWrite() {
-        tl::lock_guard lg(mutex);
-        if (used.get() == num)
-            return nullptr;
+    return data[tmpIndex];
+  }
 
-        uint8_t tmpIndex = writeIndex;
-
-        used.decMin(0);
-
-        ++writeIndex;
-        if (writeIndex == num)
-            writeIndex = 0;
-
-        return data[tmpIndex];
+  T *nextRead()
+  {
+    tl::lock_guard lock_guard(mutex);
+    if (used.get() == 0) {
+      return nullptr;
     }
 
-    //........................................................................
-    T *nextRead() {
-        tl::lock_guard lg(mutex);
-        if (used.get() == 0)
-            return nullptr;
+    uint8_t tmpIndex = readIndex;
 
-        uint8_t tmpIndex = readIndex;
+    used.decMin(0);
 
-        used.decMin(0);
-
-        ++readIndex;
-        if (readIndex == num)
-            readIndex = 0;
-
-        return data[tmpIndex];
+    ++readIndex;
+    if (readIndex == num) {
+      readIndex = 0;
     }
+
+    return data[tmpIndex];
+  }
 };
 
 ///
 /// Потокобезопасный циклический пул всего
 ///
-template<uint8_t num, typename T= uint8_t>
-class Cycler {
+template<uint8_t num, typename T = uint8_t>
+class Cycler
+{
 
-    T data[num];
-    volatile uint8_t writeIndex = 0;
-    volatile uint8_t readIndex = 0;
+  T       data[num];
+  uint8_t writeIndex = 0;
+  uint8_t readIndex  = 0;
 
-//		std_atomic<uint8_t>		used; //TODO: to atomic
-    tl::SyncCounter<int> used;
-    tl::spinlock_mutex mutex;
+  tl::SyncCounter<int> used;
+  tl::spinlock_mutex   mutex;
 
 public:
+  Cycler() = default;
 
-    //........................................................................
-    Cycler() :
-            writeIndex{0},
-            readIndex{0} {}
+  void reset()
+  {
+    tl::lock_guard lock_guard(mutex);
+    writeIndex = 0;
+    readIndex  = 0;
+    used.set(0);
+  }
 
-    //........................................................................
-    void reset() {
-        tl::lock_guard lg(mutex);
-        writeIndex = 0;
-        readIndex = 0;
-        used.set(0);
+  T *currentWrite()
+  {
+    tl::lock_guard lock_guard(mutex);
+    return data[writeIndex];
+  }
+
+  T *currentRead()
+  {
+    tl::lock_guard lock_guard(mutex);
+    return data[readIndex];
+  }
+
+  bool isEmpty()
+  {
+    tl::lock_guard lock_guard(mutex);
+    return (used.get() == 0);
+  }
+
+  T *nextWrite()
+  {
+    tl::lock_guard lock_guard(mutex);
+    if (used.get() == num) {
+      return nullptr;
     }
 
-    T *currentWrite() {
-        tl::lock_guard lg(mutex);
-        return data[writeIndex];
+    uint8_t tmpIndex = writeIndex;
+
+    used.incMax(num);
+
+    ++writeIndex;
+    if (writeIndex == num) {
+      writeIndex = 0;
     }
 
-    //........................................................................
-    T *currentRead() {
-        tl::lock_guard lg(mutex);
-        return data[readIndex];
+    return &data[tmpIndex];
+  }
+
+  T *nextRead()
+  {
+    tl::lock_guard lock_guard(mutex);
+    if (used.get() == 0) {
+      return nullptr;
     }
 
-    //........................................................................
-    bool isEmpty() {
-        tl::lock_guard lg(mutex);
-        return (used.get() == 0);
+    uint8_t tmpIndex = readIndex;
+
+    used.decMin(0);
+
+    ++readIndex;
+    if (readIndex == num) {
+      readIndex = 0;
     }
 
-    //........................................................................
-    T *nextWrite() {
-        tl::lock_guard lg(mutex);
-        if (used.get() == num)
-            return nullptr;
-
-        uint8_t tmpIndex = writeIndex;
-
-        used.incMax(num);
-
-        ++writeIndex;
-        if (writeIndex == num)
-            writeIndex = 0;
-
-        return &data[tmpIndex];
-    }
-
-    //........................................................................
-    T *nextRead() {
-        tl::lock_guard lg(mutex);
-        if (used.get() == 0)
-            return nullptr;
-
-        uint8_t tmpIndex = readIndex;
-
-        used.decMin(0);
-
-        ++readIndex;
-        if (readIndex == num)
-            readIndex = 0;
-
-        return &data[tmpIndex];
-    }
+    return &data[tmpIndex];
+  }
 };
 
-
-#endif //CYCLEBUFFER_H
+#endif // CYCLEBUFFER_H

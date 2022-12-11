@@ -292,6 +292,13 @@ uint32_t &asWord(T &what)
   return *reinterpret_cast<uint32_t *>(&what);
 }
 
+template<typename T, typename S=uint32_t>
+S to_index(T what)
+{
+  return static_cast<S>(what);
+}
+
+
 } // namespace tl
 
-#endif // UTILITY_H
+#endif // _UTILITY_H

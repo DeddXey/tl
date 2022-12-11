@@ -1,7 +1,7 @@
 #ifndef OSCILLOSCOPE_H
 #define OSCILLOSCOPE_H
 
-#include "log/log.h"
+#include "log.h"
 #include <array>
 
 ///

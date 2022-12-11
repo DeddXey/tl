@@ -1,7 +1,7 @@
 #ifndef FIFO_H
 #define FIFO_H
 
-//#include "dbg.h"
+
 #include "sync.h"
 #include <array>
 #include <mutex>
@@ -10,7 +10,6 @@ namespace tl {
 template<typename T, uint32_t sz>
 class Fifo
 {
-
   uint32_t             writeIndex = 0;
   uint32_t             readIndex  = 0;
   uint32_t             used       = 0;
@@ -32,31 +31,26 @@ public:
     used                   = 0;
   }
 
-  //------------------------------------------------------------------------
-  bool empty() const
+  [[nodiscard]] bool empty() const
   {
     return (used == 0);
   }
 
-  //------------------------------------------------------------------------
-  bool full() const
+  [[nodiscard]] bool full() const
   {
     return (used == sz);
   }
 
-  //------------------------------------------------------------------------
-  uint32_t size() const
+  [[nodiscard]] uint32_t size() const
   {
     return (sz - used);
   }
 
-  //------------------------------------------------------------------------
-  constexpr uint32_t maxsize() const
+  [[nodiscard]] constexpr uint32_t maxsize() const
   {
     return sz;
   }
 
-  //------------------------------------------------------------------------
   bool push(const T /*&*/ value)
   {
     tl::critical_section cs;
@@ -78,10 +72,7 @@ public:
     return out;
   }
 
-  //------------------------------------------------------------------------
-  ///
   /// \brief Remove last read element from fifo
-  ///
   void pop()
   {
     tl::critical_section cs;
@@ -95,50 +86,40 @@ public:
     }
   }
 
-  //------------------------------------------------------------------------
   const T &getOut() const
   {
-    tl::critical_section cs;
+    tl::critical_section guard;
     return data[readIndex];
   }
 
-  //------------------------------------------------------------------------
   uint32_t getReadIndex()
   {
     return readIndex;
   }
 
-  //------------------------------------------------------------------------
   uint32_t getWriteIndex()
   {
     return writeIndex;
   }
 
-  //------------------------------------------------------------------------
   uint32_t getUsed()
   {
     return used;
   }
 
-  //------------------------------------------------------------------------
-  ///
   /// \brief Get fifo element to write
   /// \return ref to  element
-  ///
   T &asyncGetToWrite()
   {
-    tl::critical_section cs;
+    tl::critical_section guard;
     return data[writeIndex];
   }
 
-  //------------------------------------------------------------------------
-  ///
   /// \brief Write complete
   /// \return ref to new write element
-  ///
   T &asyncWritten()
   {
-    tl::critical_section cs;
+    tl::critical_section guard;
 
     if (used != sz - 1) {
       ++used;

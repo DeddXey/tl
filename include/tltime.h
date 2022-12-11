@@ -9,9 +9,9 @@ struct Time {
     uint8_t hour;
     uint8_t minute;
     uint8_t second;
-};
+} __attribute__((aligned(4)));
 
 }
 
 
-#endif // TMTIME_H
+#endif // TLTIME_H

@@ -19,54 +19,28 @@ auto fletcher8Checksum(T begin, T end)
     a += *i;
     b = b + a;
   }
-
   return std::make_tuple(a, b);
 }
 
-//------------------------------------------------------------------------
-class Fletcher8Checksum
+template<typename T, uint8_t poly = 0xff>
+constexpr uint8_t Crc8_16(const T &data)
 {
+  uint8_t crc = poly;
 
-  uint8_t a = 0;
-  uint8_t b = 0;
-
-public:
-  Fletcher8Checksum() : a(0), b(0) {}
-  void reset();
-
-  uint8_t getB() const
-  {
-    return b;
-  }
-
-  uint8_t getA() const
-  {
-    return a;
-  }
-
-  void addByte(const uint8_t byte);
-};
-
-//------------------------------------------------------------------------
-template<typename T>
-constexpr uint8_t Crc8_16(const T &c)
-{
-  uint8_t crc = 0xFF;
-  // unsigned int i;
-
-  for (auto &a : c) {
+  for (auto &a : data) {
     crc ^= ((a >> 8U) & 0xffU);
-    for (auto i = 0U; i < 8U; i++)
+    for (auto i = 0U; i < 8U; i++) {
       crc = crc & 0x80U ? (crc << 1U) ^ 0x31U : crc << 1U;
+    }
     crc ^= (a & 0xffU);
-    for (auto i = 0U; i < 8; i++)
+    for (auto i = 0U; i < 8; i++) {
       crc = crc & 0x80U ? (crc << 1U) ^ 0x31U : crc << 1U;
+    }
   }
 
   return crc;
 }
 
-//------------------------------------------------------------------------
 template<typename T>
 constexpr uint8_t Crc8(const T &c)
 {

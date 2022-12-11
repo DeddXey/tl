@@ -1,157 +1,141 @@
-#ifndef FIFO_ATOMIC_H
-#define FIFO_ATOMIC_H
+#ifndef FIFO_H
+#define FIFO_H
 
+//#include "dbg.h"
 #include <array>
 #include <atomic>
 #include <mutex>
+#include <optional>
 
+namespace tl {
+template<typename T, uint32_t sz>
+class fifo_atomic
+{
 
-template <typename T, uint32_t sz>
-class FifoAtomic {
-
-    uint32_t                writeIndex = 0;
-    uint32_t                readIndex = 0;
-    std::atomic<uint32_t>   used = 0;
-    std::mutex              mtx;
-
+  uint32_t              writeIndex = 0;
+  uint32_t              readIndex  = 0;
+  std::atomic<uint32_t> used       = 0;
+  std::array<T, sz>     data;
 
 public:
-    std::array<T, sz> data;
+  fifo_atomic() : used(0)
+  {
+    clear();
+  }
 
-    FifoAtomic():
-        writeIndex(0),readIndex(0),used(0)
-    {
-        clear();
+  void clear()
+  {
+    writeIndex = readIndex = 0;
+    used.store(0);
+  }
+
+  [[nodiscard]] bool empty() const
+  {
+    return (used.load() == 0);
+  }
+
+  [[nodiscard]] bool full() const
+  {
+    return (used.load() == sz - 1);
+  }
+
+  [[nodiscard]] uint32_t size() const
+  {
+    return (sz - used.load());
+  }
+
+  [[nodiscard]] constexpr uint32_t maxsize() const
+  {
+    return sz;
+  }
+
+  bool push(const T &value)
+  {
+    uint32_t try_used = used.load();
+    do {
+      if (try_used == sz - 1)
+        return false;
+
+    } while (!used.compare_exchange_weak(try_used, try_used + 1));
+
+    data[writeIndex] = value;
+
+    ++writeIndex;
+    if (writeIndex == sz)
+      writeIndex = 0;
+
+    return true;
+  }
+
+  ///
+  /// \brief Remove last read element from fifo
+  ///
+  void pop()
+  {
+    uint32_t try_used = used.load();
+    do {
+      if (try_used == 0)
+        return;
+
+    } while (!used.compare_exchange_weak(try_used, try_used - 1));
+
+    ++readIndex;
+    if (readIndex == sz)
+      readIndex = 0;
+  }
+
+  std::optional<const T> getOut() const
+  {
+    return used.load() == 0 ? std::nullopt
+                            : std::optional<const T>{ data[readIndex] };
+  }
+
+  uint32_t getReadIndex()
+  {
+    return readIndex;
+  }
+
+  uint32_t getWriteIndex()
+  {
+    return writeIndex;
+  }
+
+  uint32_t getUsed()
+  {
+    return used;
+  }
+
+  ///
+  /// \brief Get fifo element to write
+  /// \return ref to  element
+  ///
+  T &asyncGetToWrite()
+  {
+    return data[writeIndex];
+  }
+
+  ///
+  /// \brief Write complete
+  /// \return ref to new write element
+  ///
+  T &asyncWritten()
+  {
+
+    uint32_t try_used = used.load(std::memory_order_seq_cst);
+    do {
+      if (try_used == sz - 1)
+        return {};
+
+    } while (!used.compare_exchange_weak(try_used,
+                                         try_used + 1));
+
+    ++writeIndex;
+    if (writeIndex == sz) {
+      writeIndex = 0;
     }
 
-    //------------------------------------------------------------------------
-    void clear()
-    {
-        std::lock_guard<std::mutex> lg(mtx);
-        writeIndex = readIndex = 0;
-        used = 0;
-
-    }
-
-    //------------------------------------------------------------------------
-    bool empty() const
-    {
-        return (used.load() == 0);
-    }
-
-    //------------------------------------------------------------------------
-    bool full() const
-    {
-        return (used == sz);
-    }
-
-    //------------------------------------------------------------------------
-    uint32_t size() const
-    {
-        return (sz - used);
-    }
-
-    //------------------------------------------------------------------------
-    constexpr uint32_t maxsize() const
-    {
-        return sz;
-    }
-
-    //------------------------------------------------------------------------
-    bool push(const T/*&*/ value)
-    {
-        std::lock_guard<std::mutex> lg(mtx);
-
-        bool out = true;
-        if (used.load() != sz) {
-
-            data[writeIndex] = value;
-            ++used;
-
-            ++writeIndex;
-            if (writeIndex == sz)
-                writeIndex = 0;
-
-        }
-        else {
-            out = false;
-        }
-
-        return out;
-    }
-
-    //------------------------------------------------------------------------
-    ///
-    /// \brief Remove last read element from fifo
-    ///
-    void pop()
-    {
-        std::lock_guard<std::mutex> lg(mtx);
-
-        if (used.load() != 0) {
-            --used;
-
-            ++readIndex;
-            if (readIndex == sz)
-                readIndex = 0;
-        }
-    }
-
-    //------------------------------------------------------------------------
-    const T& getOut() const
-    {
-        return data[readIndex];
-    }
-
-    //------------------------------------------------------------------------
-    uint32_t getReadIndex()
-    {
-        return readIndex;
-    }
-
-    //------------------------------------------------------------------------
-    uint32_t getWriteIndex()
-    {
-        return writeIndex;
-    }
-
-    //------------------------------------------------------------------------
-    uint32_t getUsed()
-    {
-        return used.load();
-    }
-
-    //------------------------------------------------------------------------
-    ///
-    /// \brief Get fifo element to write
-    /// \return ref to  element
-    ///
-    T& asyncGetToWrite()
-    {
-        return data[writeIndex];
-    }
-
-    //------------------------------------------------------------------------
-    ///
-    /// \brief Write complete
-    /// \return ref to new write element
-    ///
-    T& asyncWritten()
-    {
-        std::lock_guard lg(mtx);
-
-        if (used != sz-1) {
-            ++used;
-
-            ++writeIndex;
-            if (writeIndex == sz)
-                writeIndex = 0;
-        }
-
-        return data[writeIndex];
-    }
+    return std::optional<T &>{ data[writeIndex] };
+  }
 };
-
-
-
-#endif // FIFO_ATOMIC_H
+} // namespace tl
+#endif // FIFO_H
