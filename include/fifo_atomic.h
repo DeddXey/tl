@@ -11,7 +11,7 @@ namespace tl {
 template<typename T, uint32_t sz>
 class fifo_atomic
 {
-
+protected:
   uint32_t              writeIndex = 0;
   uint32_t              readIndex  = 0;
   std::atomic<uint32_t> used       = 0;
