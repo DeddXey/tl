@@ -13,7 +13,8 @@ enum class LogLevel : uint8_t
   error   = 2,
   warning = 3,
   info    = 4,
-  debug   = 5
+  debug   = 5,
+  usb = 6
 };
 
 enum class Fg : uint8_t
@@ -63,7 +64,8 @@ enum class Use : uint8_t
   w0,
   w2,
   w4,
-  w8
+  w8,
+  sign
 };
 
 /// \brief An simple output stream implementation
@@ -79,6 +81,7 @@ public:
 private:
   uint8_t base     = 10;
   uint8_t trailing = 0;
+  bool    signed_values = false;
   Port    port;
 
 public:
@@ -124,6 +127,10 @@ public:
   void process()
   {
     port.irqHandler();
+  }
+  void set_signed_values(bool val)
+  {
+    signed_values = val;
   }
 
 };
@@ -186,6 +193,16 @@ public:
   auto &debug()
   {
     if constexpr (ll >= LogLevel::debug) {
+      return logger;
+    }
+    else {
+      return dumb;
+    }
+  }
+
+  auto &usb()
+  {
+    if constexpr (ll >= LogLevel::usb) {
       return logger;
     }
     else {
@@ -261,6 +278,9 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, Use val)
       break;
     case Use::w8:
       stream.setWidth(8);
+      break;
+    case Use::sign:
+      stream.set_signed_values(true);
       break;
     }
   }

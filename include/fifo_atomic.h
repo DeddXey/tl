@@ -1,5 +1,5 @@
-#ifndef FIFO_H
-#define FIFO_H
+#ifndef FIFO_ATOMIC_H
+#define FIFO_ATOMIC_H
 
 //#include "dbg.h"
 #include <array>
@@ -90,6 +90,11 @@ public:
                             : std::optional<const T>{ data[readIndex] };
   }
 
+  T& getOutMut() const
+  {
+    return data[readIndex];
+  }
+
   uint32_t getReadIndex()
   {
     return readIndex;
@@ -118,7 +123,7 @@ public:
   /// \brief Write complete
   /// \return ref to new write element
   ///
-  T &asyncWritten()
+  std::optional<T>asyncWritten()
   {
 
     uint32_t try_used = used.load(std::memory_order_seq_cst);
@@ -134,8 +139,8 @@ public:
       writeIndex = 0;
     }
 
-    return std::optional<T &>{ data[writeIndex] };
+    return std::optional<T>{ data[writeIndex] };
   }
 };
 } // namespace tl
-#endif // FIFO_H
+#endif // FIFO_ATOMIC_H
