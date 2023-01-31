@@ -8,9 +8,61 @@
 #include <optional>
 
 namespace tl {
+
+
+/// Iterator for fifo ring buffer
+template<typename T, uint32_t sz>
+class fifo_read_iterator
+{
+  std::array<T, sz>&     data_;
+  uint32_t idx;
+
+
+public:
+  explicit fifo_read_iterator(std::array<T, sz>& data,
+                              uint32_t index): data_(data), idx(index){}
+
+  bool operator == (fifo_read_iterator<T, sz>& other)
+  {
+    return this->idx == other.idx;
+  }
+
+  bool operator != (fifo_read_iterator<T, sz>& other)
+  {
+    return !(*this == other);
+  }
+
+  T& operator*()
+  {
+    return data_[idx];
+  }
+
+  fifo_read_iterator<T, sz>& operator++()
+  {
+    ++idx;
+    if (idx == sz) {
+      idx == 0;
+    }
+    return *this;
+  }
+
+  fifo_read_iterator<T, sz> operator++(int)
+  {
+    fifo_read_iterator<T, sz> temp = *this;
+    ++*this;
+    return temp;
+  }
+
+
+};
+
+/// Atomic realization of ring fifo buffer
 template<typename T, uint32_t sz>
 class fifo_atomic
 {
+public:
+  using value_type [[maybe_unused]] = T;
+
 protected:
   uint32_t              writeIndex = 0;
   uint32_t              readIndex  = 0;
@@ -18,6 +70,23 @@ protected:
   std::array<T, sz>     data;
 
 public:
+
+  /// Get begin read iterator
+  fifo_read_iterator<T, sz> begin()
+  {
+    return fifo_read_iterator<T, sz>(data, readIndex);
+  }
+
+  /// Get begin write iterator
+  fifo_read_iterator<T, sz> end()
+  {
+    u_int32_t temp = readIndex + used;
+    if (temp >= sz) {
+      temp -= sz;
+    }
+    return fifo_read_iterator(data, temp);
+  }
+
   fifo_atomic() : used(0)
   {
     clear();
