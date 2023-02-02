@@ -29,6 +29,23 @@ class byte_buffer
 public:
   byte_buffer(IB begin, IB end) : begin_(begin), end_(end), current(begin) {}
 
+  /// Skip num_to_skip bytes in the iterated fifo buffer
+  bool skip_bytes(uint32_t num_to_skip)
+  {
+    uint32_t  cnt = 0;
+    while (cnt < num_to_skip) {
+      if (current != end_) {
+        ++current;
+      }
+      else {
+        return false;
+      }
+      ++cnt;
+    }
+    return true;
+  }
+
+  /// Get LE value from byte buffer
   template<typename T>
   std::optional<T> get_value_le()
   {
@@ -46,6 +63,7 @@ public:
     return std::optional<T>{ val.value };
   }
 
+  /// Get BE value from byte buffer
   template<typename T>
   std::optional<T> get_value_be()
   {

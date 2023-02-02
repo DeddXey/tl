@@ -7,6 +7,7 @@
 #include <mutex>
 #include <optional>
 
+
 namespace tl {
 
 
@@ -46,7 +47,7 @@ public:
     return *this;
   }
 
-  fifo_read_iterator<T, sz> operator++(int)
+  const fifo_read_iterator<T, sz> operator++(int)
   {
     fifo_read_iterator<T, sz> temp = *this;
     ++*this;
@@ -136,9 +137,7 @@ public:
     return true;
   }
 
-  ///
   /// \brief Remove last read element from fifo
-  ///
   void pop()
   {
     uint32_t try_used = used.load();
@@ -152,6 +151,22 @@ public:
     if (readIndex == sz)
       readIndex = 0;
   }
+  /// \brief Remove last read element from fifo
+  void pop(uint32_t num)
+  {
+    uint32_t try_used = used.load();
+    do {
+      if (try_used < num)
+        return;
+
+    } while (!used.compare_exchange_weak(try_used, try_used - num));
+
+    readIndex += num;
+    if (readIndex >= sz)
+      readIndex -= sz;
+  }
+
+
 
   std::optional<const T> getOut() const
   {
