@@ -5,11 +5,10 @@
 #ifndef REG_F_PACKET_H
 #define REG_F_PACKET_H
 
+#include "bytebuffer.h"
 #include "range.h"
 #include <cstdint>
 #include <optional>
-#include "bytebuffer.h"
-
 
 /// Calculate mavlink - type crc
 auto crc_mav(auto begin, auto end)
@@ -27,7 +26,6 @@ auto crc_mav(auto begin, auto end)
   return acc;
 }
 
-
 /// 9  2 = 18 bytes = 144 bits
 /// 2400 => 16 Hz
 struct packet_rc_full
@@ -40,7 +38,7 @@ struct packet_rc_full
 struct packet_rc_nav
 {
   constexpr static uint8_t signature = 0xAC;
-  uint16_t analog_channels[4];
+  uint16_t                 analog_channels[4];
 };
 
 /// Context with all packet state
@@ -50,9 +48,9 @@ struct device_context
 } __attribute__((aligned(8)));
 
 ///
-auto check_signature(uint8_t signature)
+auto check_byte(uint8_t signature)
 {
-  auto ret  = [&](auto ran) -> std::optional<decltype(ran)> {
+  auto ret = [&](auto ran) -> std::optional<decltype(ran)> {
     if (*ran.begin() == signature) {
       // Return range without signature
       return std::make_optional(tl::Range(ran.begin() + 1, ran.end()));
@@ -62,10 +60,9 @@ auto check_signature(uint8_t signature)
   return ret;
 }
 
-
 auto check_size(auto size)
 {
-  auto ret  = [&](auto ran) -> std::optional<decltype(ran)> {
+  auto ret = [&](auto ran) -> std::optional<decltype(ran)> {
     if ((ran.end() - ran.begin()) < size) {
       // Return empty range
       return std::make_optional(tl::Range(ran.begin(), ran.begin()));
@@ -75,10 +72,9 @@ auto check_size(auto size)
   return ret;
 }
 
-
 auto check_crc(auto crc_fun)
 {
-  auto ret  = [&](auto ran) -> std::optional<decltype(ran)>  {
+  auto ret = [&](auto ran) -> std::optional<decltype(ran)> {
     auto bb  = tl::byte_buffer(ran.end() - 2, ran.end());
     auto val = bb.template get_value_le<uint16_t>();
     if (*val == crc_fun(ran.begin(), ran.end() - 2)) {
@@ -92,7 +88,7 @@ auto check_crc(auto crc_fun)
 
 auto mbind(auto fun)
 {
-  auto ret  = [&](auto opt) -> decltype(fun(opt.value())) {
+  auto ret = [&](auto opt) -> decltype(fun(opt.value())) {
     if (opt) {
       return fun(opt.value());
     }
@@ -104,7 +100,7 @@ auto mbind(auto fun)
 /// Unwrap optional monad to default value if not exist
 auto unwrap_opt_range(auto default_value)
 {
-  auto ret  = [&](auto opt) -> decltype(opt.value()) {
+  auto ret = [&](auto opt) -> decltype(opt.value()) {
     if (opt) {
       return opt.value();
     }
@@ -114,16 +110,15 @@ auto unwrap_opt_range(auto default_value)
 }
 
 /// Returns remaining range after parsing or original range if fail
-auto parse_rc_nav(packet_rc_nav& nav_packet)
+auto parse_rc_nav(packet_rc_nav &nav_packet, uint8_t id)
 {
-  auto ret  = [&](auto ran)
-  {
-     auto out = ran
-      | mbind(check_signature(nav_packet.signature))
+  auto ret = [&](auto ran) {
+    auto out =
+      ran | mbind(check_byte(nav_packet.signature)) // signature
       | mbind(check_size(sizeof(packet_rc_nav) + 4))
       | mbind(check_crc(crc_mav))
+      | mbind(check_byte(id))                       // id
       | unwrap_opt_range(ran);
-
   };
 
   return ret;
@@ -131,20 +126,15 @@ auto parse_rc_nav(packet_rc_nav& nav_packet)
 
 /// Correct fifo read pointer to remaining range size
 /// If fifo begin iterator is the same as in range, increment it by 1
-auto correct_fifo(auto& fifo)
+auto correct_fifo(auto &fifo)
 {
   // TODO:
 }
 
-
-
 template<typename F>
 bool parse_dispatch(F &fifo, device_context &context)
 {
-  tl::makeRange(fifo)
-    | parse_rc_nav(context.rc_nav)
-    | correct_fifo();
+  tl::makeRange(fifo) | parse_rc_nav(context.rc_nav) | correct_fifo();
 }
-
 
 #endif // REG_F_PACKET_H
