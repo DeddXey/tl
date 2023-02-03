@@ -35,15 +35,15 @@ auto offset(R val)
 }
 
 //----------------------------------------------------------------------------
-auto printRange()
-{
-  auto ret = [](auto ran) {
-    for (auto i : ran) {
-      con.always() << i << Use::endl;
-    }
-    return ran;
-  };
-  return ret;
-}
+//auto printRange()
+//{
+//  auto ret = [](auto ran) {
+//    for (auto i : ran) {
+//      con.always() << i << Use::endl;
+//    }
+//    return ran;
+//  };
+//  return ret;
+//}
 
 #endif // TRANSFORMS_H

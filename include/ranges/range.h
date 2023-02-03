@@ -1,6 +1,7 @@
 #ifndef RANGE_H
 #define RANGE_H
 
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -38,6 +39,12 @@ public:
   {
     return end_;
   }
+
+  constexpr auto is_empty() const noexcept
+  {
+    return (end_ == begin_);
+  }
+
 };
 
 /// \brief Make Range from any collection

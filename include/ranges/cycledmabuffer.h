@@ -13,7 +13,6 @@
 class CycleDmaIteratorSentinel {};
 
 
-//============================================================================
 template <typename T, size_t chunkSize>
 class CycleDmaIterator {
 
@@ -29,7 +28,6 @@ class CycleDmaIterator {
     int32_t     off;
 
 
-    //------------------------------------------------------------------------
     uint32_t getIteratorChunk() const
     {
         return (ptr - bufPtr) / chunkSize;
@@ -38,7 +36,6 @@ class CycleDmaIterator {
 
 public:
 
-    //------------------------------------------------------------------------
     CycleDmaIterator(T buffer, size_t length) :
         bufPtr(buffer),
         len(length),
@@ -47,13 +44,11 @@ public:
         dmaPtr(buffer),
         ptr(buffer)  {}
 
-    //------------------------------------------------------------------------
     uint16_t* getNextDmaBuffer()
     {
         return dmaPtr;
     }
 
-    //------------------------------------------------------------------------
     void nextDmaChunk()
     {
         ++dmaChunkNumber;
@@ -62,7 +57,6 @@ public:
         dmaPtr = bufPtr + dmaChunkNumber * chunkSize;
     }
 
-    //------------------------------------------------------------------------
     CycleDmaIterator& operator++()
     {
         ++ptr;
@@ -72,7 +66,6 @@ public:
         return *this;
     }
 
-    //------------------------------------------------------------------------
     CycleDmaIterator operator++(int)
     {
         CycleDmaIterator tmp(*this);
