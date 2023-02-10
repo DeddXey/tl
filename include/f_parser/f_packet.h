@@ -1,6 +1,6 @@
 #pragma once
 
-#include "range.h"
+#include "ranges/range.h"
 #include <cstdint>
 #include <iostream>
 #include "f_parse_result.h"
@@ -91,7 +91,7 @@ protected:
     };
     return ret;
   }
-  inline auto check_size(auto size)
+  inline auto check_size(uint32_t size)
   {
     auto ret = [=](auto ran) -> parse_result<decltype(ran)> {
       uint32_t szz = (ran.end() - ran.begin());
