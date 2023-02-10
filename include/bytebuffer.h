@@ -94,7 +94,7 @@ public:
   }
   /// get int8 value from buffer
   template<>
-  std::optional<uint8_t> get_value_le<int8_t>()
+  std::optional<int8_t> get_value_le<int8_t>()
   {
     if (current != end_) {
       int8_t val = *static_cast<int8_t *>(&(*current));

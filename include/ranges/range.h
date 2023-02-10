@@ -18,6 +18,9 @@ class Range
   I2 end_;
 
 public:
+
+  constexpr Range(): begin_(), end_() {}
+
   /// \brief Construct from two iterators
   /// \param begin begin iterator
   /// \param end end iterator
@@ -45,6 +48,12 @@ public:
     return (end_ == begin_);
   }
 
+  constexpr bool operator == (const Range<I1, I2>& other)  const
+  {
+    return (this->begin_ == other.begin_)&&(this->end_ == other.end_);
+  }
+
+
 };
 
 /// \brief Make Range from any collection
@@ -52,7 +61,7 @@ public:
 /// \param collection
 /// \return new collection
 template<typename T>
-constexpr auto makeRange(const T &collection) noexcept
+constexpr auto makeRange(T &collection) noexcept
 {
   return Range<decltype(collection.begin()), decltype(collection.end())>(
     collection.begin(),
@@ -80,7 +89,7 @@ constexpr auto makeRange(T *ptr, size_t size) noexcept
 {
   return Range<T *, T *>(ptr, ptr + size);
 }
-
+} // namespace tl
 ///
 /// \tparam Rng
 /// \tparam F
@@ -94,6 +103,6 @@ constexpr auto operator|(Rng &&rng, F &&c)
   return c(std::forward<Rng>(rng));
 }
 
-} // namespace tl
+
 
 #endif // RANGE_H
