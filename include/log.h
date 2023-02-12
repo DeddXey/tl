@@ -139,8 +139,8 @@ template<typename P, LogLevel ll = LogLevel::none>
 class LogWrapper
 {
 
-  LogStream<typename P::OutStream, true>  logger;
-  LogStream<typename P::OutStream, false> dumb;
+  LogStream<typename P::out_stream, true>  logger;
+  LogStream<typename P::out_stream, false> dumb;
 
 public:
   LogWrapper() = default;
