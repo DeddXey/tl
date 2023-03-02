@@ -1,14 +1,9 @@
-#ifndef BUFFERDESCRIPTOR_H
-#define BUFFERDESCRIPTOR_H
+#pragma once
 
-//#include <tuple>
 #include "log.h"
 
 #include <cstdint>
 #include <utility>
-
-// TODO: move to misc and make it template
-using BuffPair = std::pair<uint8_t *, uint32_t>;
 
 ///
 /// \brief Descriptor of simple memory buffer
@@ -17,10 +12,68 @@ template<typename M = uint8_t>
 class BufferDescriptor
 {
   const M *buffer;
-  uint32_t size;
+  size_t size = 0;
 
 public:
-  BufferDescriptor(const M *b, const uint32_t len) : buffer(b), size(len) {}
+
+  class iterator;
+  friend class iterator;
+  class iterator :public std::iterator<
+                      std::random_access_iterator_tag,
+                      M>
+  {
+    BufferDescriptor& bd;
+    int32_t idx;
+  public:
+    explicit iterator(BufferDescriptor& ibd, int32_t _idx) : bd(ibd), idx(_idx) {}
+    iterator& operator++() { idx = idx + 1; return *this; }
+    iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
+    bool operator==(iterator other) const { return idx == other.idx; }
+    bool operator!=(iterator other) const { return !(*this == other); }
+    const M& operator*() const { return bd.buffer[idx]; }
+
+    iterator operator + (int val)
+    {
+      iterator temp = *this;
+      temp.idx += val;
+      if (static_cast<size_t>(temp.idx) >= bd.size) {
+        temp.idx = bd.size;
+      }
+      return temp;
+    }
+
+    iterator operator - (int val)
+    {
+      iterator temp = *this;
+      temp.idx = temp.idx - val;
+      if (temp.idx < 0) {
+        temp.idx = 0;
+      }
+      return temp;
+    }
+
+    ptrdiff_t operator - (iterator other)
+    {
+      ptrdiff_t out = this->idx - other.idx;
+      return out;
+    }
+  };
+
+  iterator begin()
+  {
+    return iterator(*this, 0);
+  }
+
+  iterator end()
+  {
+    return iterator(*this, size);
+  }
+
+  template<typename T>
+  explicit BufferDescriptor(T& entity)
+    : buffer(reinterpret_cast<uint8_t*>(&entity)), size(sizeof(entity)) {}
+
+  BufferDescriptor(const M *ptr, const size_t len) : buffer(ptr), size(len) {}
   BufferDescriptor() = default;
 
   template<int N>
@@ -28,78 +81,44 @@ public:
   {
   }
 
-  ///
   /// \brief Get BufferDescriptor from discrete parameters
   /// \param buf
   /// \param len
-  ///
   void fromValues(const M *buf, const uint32_t len)
   {
     this->buffer = buf;
     this->size   = len;
   }
 
-  //	///
-  //	/// \brief Prints buffer in hexadecimal in 16 columns
-  //	///
-  //	///
-  //	template <typename D>
-  //	void print(D& debug) const
-  //	{
-
-  //        con.debug() << Fg::cyan
-  //		      << Use::hex
-  //		      << Use::w8
-  //		      << "length: "
-  //		      << length()
-  //		      << ":"
-  //		      << length() * sizeof(T) ;
-
-  //		const auto *ptr8 = reinterpret_cast<const uint8_t*>(buffer);
-
-  //		for (uint32_t i = 0 ; i  < length() * sizeof (T); ++i) {
-  //			if (i%16 == 0)
-  //                con.debug().putChar('\n');
-
-  //            con.debug() << Use::w2<< ptr8[i] << " ";
-  //		}
-  //        con.debug() << Attr::reset << Use::endl;
-  //	}
-
   template<typename T, typename S>
   friend LogStream<T, true> &operator<<(LogStream<T, true>        &stream,
-                                        const BufferDescriptor<S> &bd);
+                                        const BufferDescriptor<S> &buffer_descriptor)
+  {
+
+      stream << Fg::cyan << Use::hex << Use::w8 << "addr: " << (int)buffer_descriptor.ptr()
+             << " length: " << buffer_descriptor.length() << ":" << buffer_descriptor.length() * sizeof(S);
+
+      const auto *ptr8 = reinterpret_cast<const uint8_t *>(buffer_descriptor.buffer);
+
+      for (uint32_t i = 0; i < buffer_descriptor.length() * sizeof(S); ++i) {
+          if (i % 16 == 0) {
+              stream.putChar('\n');
+          }
+
+          stream << Use::w2 << ptr8[i] << " ";
+      }
+      stream << Attr::reset << Use::endl;
+      return stream;
+  }
 
   [[nodiscard]] uint32_t length() const
   {
     return size;
   }
+
   const M *ptr() const
   {
     return buffer;
   }
 };
 
-//----------------------------------------------------------------------------
-template<typename T, typename S>
-LogStream<T, true> &operator<<(LogStream<T, true>        &stream,
-                               const BufferDescriptor<S> &bd)
-{
-
-  stream << Fg::cyan << Use::hex << Use::w8 << "addr: " << (int)bd.ptr()
-         << " length: " << bd.length() << ":" << bd.length() * sizeof(S);
-
-  const auto *ptr8 = reinterpret_cast<const uint8_t *>(bd.buffer);
-
-  for (uint32_t i = 0; i < bd.length() * sizeof(S); ++i) {
-    if (i % 16 == 0) {
-      stream.putChar('\n');
-    }
-
-    stream << Use::w2 << ptr8[i] << " ";
-  }
-  stream << Attr::reset << Use::endl;
-  return stream;
-}
-
-#endif // BUFFERDESCRIPTOR_H
