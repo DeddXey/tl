@@ -299,20 +299,15 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const char *val)
   return stream;
 }
 
-template<typename T, typename S, bool f>
-LogStream<T, f> &operator<<(LogStream<T, f> &stream, const S val)
+
+
+template<typename T, bool f>
+LogStream<T, f> &operator<<(LogStream<T, f> &stream, const uint32_t val)
 {
   if constexpr (stream.enabled) {
 
     std::array<uint8_t, 64> buffer{};
-    S                       sum = val;
-
-    if constexpr (std::is_signed<S>::value) {
-      if (val < 0) {
-        stream.putChar('-');
-        sum = -sum;
-      }
-    }
+    uint32_t                      sum = val;
 
     uint8_t i = 0;
     do {
@@ -338,6 +333,111 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const S val)
   }
   return stream;
 }
+
+template<typename T, bool f>
+LogStream<T, f> &operator<<(LogStream<T, f> &stream, const int32_t val)
+{
+  if constexpr (stream.enabled) {
+
+//    std::array<uint8_t, 64> buffer{};
+    int32_t                      sum = val;
+
+    if (val < 0) {
+      stream.putChar('-');
+      sum = -sum;
+    }
+
+    return operator<<(stream, static_cast<uint32_t> (sum));
+
+//    uint8_t i = 0;
+//    do {
+//      int32_t digit = 0;
+//      digit         = sum % stream.getBase();
+//      if (digit < 0xA) {
+//        buffer[i] = '0' + digit;
+//      }
+//      else {
+//        buffer[i] = 'A' + digit - 0xA;
+//      }
+//      sum /= stream.getBase();
+//      ++i;
+//    } while (sum);
+//
+//    for (int j = 0; j < stream.getTrailing() - i; ++j) {
+//      stream.putChar('0');
+//    }
+//
+//    for (; i != 0; --i) {
+//      stream.putChar(buffer[i - 1]);
+//    }
+  }
+  return stream;
+}
+
+template<typename T, bool f>
+LogStream<T, f> &operator<<(LogStream<T, f> &stream, const  uint8_t val)
+{
+  return operator<<(stream, static_cast<uint32_t> (val));
+}
+
+template<typename T, bool f>
+LogStream<T, f> &operator<<(LogStream<T, f> &stream, const  uint16_t val)
+{
+  return operator<<(stream, static_cast<uint32_t> (val));
+}
+
+template<typename T, bool f>
+LogStream<T, f> &operator<<(LogStream<T, f> &stream, const  int8_t val)
+{
+  return operator<<(stream, static_cast<int32_t> (val));
+}
+
+template<typename T, bool f>
+LogStream<T, f> &operator<<(LogStream<T, f> &stream, const  int16_t val)
+{
+  return operator<<(stream, static_cast<int32_t> (val));
+}
+
+
+//template<typename T, typename S, bool f>
+//LogStream<T, f> &operator<<(LogStream<T, f> &stream, const S val)
+//{
+//  if constexpr (stream.enabled) {
+//
+//    std::array<uint8_t, 64> buffer{};
+//    S                       sum = val;
+//
+//    if constexpr (std::is_signed<S>::value) {
+//      if (val < 0) {
+//        stream.putChar('-');
+//        sum = -sum;
+//      }
+//    }
+//
+//    uint8_t i = 0;
+//    do {
+//      int32_t digit = 0;
+//      digit         = sum % stream.getBase();
+//      if (digit < 0xA) {
+//        buffer[i] = '0' + digit;
+//      }
+//      else {
+//        buffer[i] = 'A' + digit - 0xA;
+//      }
+//      sum /= stream.getBase();
+//      ++i;
+//    } while (sum);
+//
+//    for (int j = 0; j < stream.getTrailing() - i; ++j) {
+//      stream.putChar('0');
+//    }
+//
+//    for (; i != 0; --i) {
+//      stream.putChar(buffer[i - 1]);
+//    }
+//  }
+//  return stream;
+//}
 
 
 #endif // LOG_H
