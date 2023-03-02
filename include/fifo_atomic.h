@@ -11,162 +11,7 @@
 namespace tl {
 
 
-/// Iterator for fifo ring buffer
-template<typename F/*, uint32_t sz*/>
-class fifo_read_iterator
-{
-  F*     fifo_;
-  uint32_t idx;
 
-  template<typename T>
-  union value {
-    T       value;
-    uint8_t buff[sizeof(T)];
-  };
-
-public:
-  using value_type [[maybe_unused]] = F::value_type;
-
-  fifo_read_iterator(): idx(0) {}
-
-  explicit fifo_read_iterator(F& fifo,
-                              uint32_t index): fifo_(&fifo), idx(index){}
-
-//  fifo_read_iterator<F, sz>& operator = (const fifo_read_iterator<F, sz> & other)
-//  {
-//    this->idx = other.idx;
-//    this->fifo_ = other.fifo_;
-//
-//    return *this;
-//  }
-
-  bool operator == (const fifo_read_iterator<F>& other) const
-  {
-    return this->idx == other.idx;
-  }
-
-  bool operator != (const fifo_read_iterator<F>& other) const
-  {
-    return !(*this == other);
-  }
-
-  value_type& operator*()
-  {
-    return fifo_->get_by_idx(idx);
-  }
-
-  fifo_read_iterator<F>& operator++()
-  {
-    ++idx;
-    if (idx == F::depth) {
-      idx = 0;
-    }
-    return *this;
-  }
-
-  const fifo_read_iterator<F> operator++(int)
-  {
-    fifo_read_iterator<F> temp = *this;
-    ++(*this);
-    return temp;
-  }
-
-  fifo_read_iterator<F> operator + (int val)
-  {
-    fifo_read_iterator<F> temp = *this;
-    temp.idx += val;
-    if (idx >= F::depth) {
-      idx -= F::depth;
-    }
-    return temp;
-  }
-
-  fifo_read_iterator<F> operator - (int val)
-  {
-    fifo_read_iterator<F> temp = *this;
-    int32_t  tmp_idx = temp.idx - val;
-    if (tmp_idx < 0) {
-      tmp_idx = F::depth + tmp_idx;
-    }
-    temp.idx = tmp_idx;
-    return temp;
-  }
-
-  uint32_t operator - (fifo_read_iterator<F> other)
-  {
-    int out = this->idx - other.idx;
-    if (out < 0) {
-      out = F::depth + out;
-    }
-
-    return out;
-  }
-
-  /// Get LE value
-  template<typename T>
-  std::optional<T> get_value_le()
-  {
-    value<T> val;
-    uint8_t  cnt = 0;
-    auto current = *this;
-    do {
-      if (current != fifo_->end()) {
-        val.buff[cnt] = *(current);
-        ++current;
-      }
-      else {
-        return std::nullopt;
-      }
-      ++cnt;
-    } while (cnt < sizeof(T));
-
-    *this = current;
-    return std::optional<T>{ val.value };
-  }
-
-  /// Get BE value from byte buffer
-  template<typename T>
-  std::optional<T> get_value_be()
-  {
-    value<T> val;
-    uint8_t  cnt = 0;
-    auto current = *this;
-    do {
-      if (current != fifo_->end()) {
-        val.buff[sizeof(T) - 1 - cnt] = *current++;
-      }
-      else {
-        return std::nullopt;
-      }
-      ++cnt;
-    } while (cnt < sizeof(T));
-    *this = current;
-    return std::optional<T>{ val.value };
-  }
-
-  /// get uint8 value from buffer
-
-  std::optional<uint8_t> get_u8_le()
-  {
-    if (*this != fifo_->end()) {
-      uint8_t val = *static_cast<uint8_t *>(&(**this));
-      ++(*this);
-      return std::optional<uint8_t>{ val };
-    }
-    return std::nullopt;
-  }
-  /// get int8 value from buffer
-  std::optional<int8_t> get_i8_le()
-  {
-    if (*this != fifo_->end()) {
-      int8_t val = *static_cast<int8_t *>(&(**this));
-      ++(*this);
-      return std::optional<int8_t>{ val };
-    }
-    return std::nullopt;
-  }
-
-};
 
 
 
@@ -176,10 +21,168 @@ public:
 template<typename T, uint32_t sz>
 class fifo_atomic
 {
-  friend class fifo_read_iterator<fifo_atomic<T, sz>>;
+//  friend class fifo_read_iterator<fifo_atomic<T, sz>>;
 public:
   using value_type [[maybe_unused]] = T;
   constexpr static uint32_t depth   = sz;
+
+    /// Iterator for fifo ring buffer
+    class iterator;
+    friend class iterator;
+    class iterator:public std::iterator<
+            std::random_access_iterator_tag,
+            T>
+    {
+        fifo_atomic<T, sz>*     fifo_;
+        uint32_t idx;
+
+        template<typename R>
+        union value {
+            T       value;
+            uint8_t buff[sizeof(T)];
+        };
+
+    public:
+//        using value_type [[maybe_unused]] = F::value_type;
+
+        iterator(): idx(0) {}
+
+        explicit iterator(fifo_atomic<T, sz>& fifo,
+                                    uint32_t index): fifo_(&fifo), idx(index){}
+
+        bool operator == (const iterator& other) const
+        {
+            return this->idx == other.idx;
+        }
+
+        bool operator != (const iterator& other) const
+        {
+            return !(*this == other);
+        }
+
+        value_type& operator*()
+        {
+            return fifo_->get_by_idx(idx);
+        }
+
+        iterator& operator++()
+        {
+            ++idx;
+            if (idx == depth) {
+                idx = 0;
+            }
+            return *this;
+        }
+
+        const iterator operator++(int)
+        {
+            iterator temp = *this;
+            ++(*this);
+            return temp;
+        }
+
+        iterator operator + (int val)
+        {
+            iterator temp = *this;
+            temp.idx += val;
+            if (idx >= depth) {
+                idx -= depth;
+            }
+            return temp;
+        }
+
+        iterator operator - (int val)
+        {
+            iterator temp = *this;
+            int32_t  tmp_idx = temp.idx - val;
+            if (tmp_idx < 0) {
+                tmp_idx = depth + tmp_idx;
+            }
+            temp.idx = tmp_idx;
+            return temp;
+        }
+
+        uint32_t operator - (iterator other)
+        {
+            int out = this->idx - other.idx;
+            if (out < 0) {
+                out = depth + out;
+            }
+
+            return out;
+        }
+
+        /// Get LE value
+        template<typename V>
+        std::optional<V> get_value_le()
+        {
+            value<V> val;
+            uint8_t  cnt = 0;
+            auto current = *this;
+            do {
+                if (current != fifo_->end()) {
+                    val.buff[cnt] = *(current);
+                    ++current;
+                }
+                else {
+                    return std::nullopt;
+                }
+                ++cnt;
+            } while (cnt < sizeof(T));
+
+            *this = current;
+            return std::optional<T>{ val.value };
+        }
+
+        /// Get BE value from byte buffer
+        template<typename V>
+        std::optional<V> get_value_be()
+        {
+            value<V> val;
+            uint8_t  cnt = 0;
+            auto current = *this;
+            do {
+                if (current != fifo_->end()) {
+                    val.buff[sizeof(T) - 1 - cnt] = *current++;
+                }
+                else {
+                    return std::nullopt;
+                }
+                ++cnt;
+            } while (cnt < sizeof(T));
+            *this = current;
+            return std::optional<T>{ val.value };
+        }
+
+        /// get uint8 value from buffer
+
+        std::optional<uint8_t> get_u8_le()
+        {
+            if (*this != fifo_->end()) {
+                uint8_t val = *static_cast<uint8_t *>(&(**this));
+                ++(*this);
+                return std::optional<uint8_t>{ val };
+            }
+            return std::nullopt;
+        }
+        /// get int8 value from buffer
+        std::optional<int8_t> get_i8_le()
+        {
+            if (*this != fifo_->end()) {
+                int8_t val = *static_cast<int8_t *>(&(**this));
+                ++(*this);
+                return std::optional<int8_t>{ val };
+            }
+            return std::nullopt;
+        }
+
+    };
+
+
+
+
+
+
 protected:
   uint32_t              writeIndex = 0;
   uint32_t              readIndex  = 0;
@@ -191,11 +194,11 @@ protected:
     return data[idx];
   }
 
-  uint32_t get_read_idx() const
+  [[nodiscard]] uint32_t get_read_idx() const
   {
     return readIndex;
   }
-  uint32_t get_write_idx() const
+  [[nodiscard]] uint32_t get_write_idx() const
   {
     return writeIndex;
   }
@@ -203,21 +206,21 @@ protected:
 public:
 
   /// Get begin read iterator
-  fifo_read_iterator<fifo_atomic<T, sz>> begin()
+  iterator begin()
   {
-    fifo_read_iterator<fifo_atomic<T, sz>>out (*this, readIndex);
+    iterator out (*this, readIndex);
     return out;
   }
 
   /// Get begin write iterator
-  fifo_read_iterator<fifo_atomic<T, sz>> end()
+  iterator end()
   {
     uint32_t temp = readIndex + used;
     if (temp >= sz) {
       temp -= sz;
     }
 
-    fifo_read_iterator<fifo_atomic<T, sz>>out (*this, temp);
+    iterator    out (*this, temp);
     return out;
   }
 
