@@ -15,8 +15,8 @@ class parse_result {
 public:
     using value_type = T;
 private:
-    parse_result_t result_ = parse_result_t::unknown;
     T value_;
+    parse_result_t result_ = parse_result_t::unknown;
 public:
     explicit parse_result(T val): value_(val), result_(parse_result_t::ok) {}
     explicit parse_result(parse_result_t result): value_(), result_(result) {}
