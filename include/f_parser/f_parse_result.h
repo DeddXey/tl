@@ -28,7 +28,7 @@ public:
     {
         return value_;
     }
-    parse_result_t error() const
+    [[nodiscard]] parse_result_t error() const
     {
         return result_;
     }

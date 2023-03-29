@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <optional>
 #include "bufferdescriptor.h"
+#include "value.h"
 
 /// 9  2 = 18 bytes = 144 bits
 /// 2400 => 16 Hz
@@ -39,15 +40,18 @@ public:
     auto fill() {
 
         auto ret = [&](auto ran) -> parse_result<decltype(ran)>  {
-            auto d = this;
-            auto curr = ran.begin();
-            for (uint16_t &i: d->context->analog_channels) {
-                i = curr.template get_value_le<uint16_t>().value();
-                //      ++ran.begin();
-            }
-            d->context->digital_channels = curr.template get_value_le<uint16_t>().value();
+          parser prs(ran);
 
-            return parse_result(tl::Range(curr, ran.end()));
+          for (int i = 0; i < num_channels; ++i) {
+            context->analog_channels[i] =
+              prs.template get_value_le<uint16_t>().value();
+//                      con.debug() << "v:" << context->analog_channels[i] << "\n";
+          }
+          context->digital_channels = prs.template get_value_le<uint16_t>().value();
+
+//          con.debug() <<  "\n";
+          return parse_result(prs.get_range());
+
         };
         return ret;
     }

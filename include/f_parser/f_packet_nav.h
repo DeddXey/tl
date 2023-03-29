@@ -6,6 +6,8 @@
 #include "f_mavlink.h"
 #include "f_parse_result.h"
 
+//#include "value.h"
+
 template<typename T>
 class packet_rc_nav
 {
@@ -36,12 +38,15 @@ public:
   inline auto fill()
   {
     auto ret = [&](auto ran) -> parse_result<decltype(ran)> {
+        parser prs(ran);
 
-      auto curr = ran.begin();
-      for (int i = 0; i < num_channels; ++i) {
-        context->analog_channels[i] = curr.template get_value_le<uint16_t>().value();
-      }
-      return parse_result(tl::Range(curr, ran.end()));
+        for (int i = 0; i < num_channels; ++i) {
+          context->analog_channels[i] =
+            prs.template get_value_le<uint16_t>().value();
+//          con.debug() << "v:" << context->analog_channels[i] << "\n";
+        }
+        return parse_result(prs.get_range());
+
     };
     return ret;
   }

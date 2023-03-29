@@ -3,7 +3,8 @@
 
 
 #include <cstdint>
-#include "gcem.hpp"
+//#include "gcem.hpp"
+#include <cmath>
 #include <cmath>
 
 
@@ -28,8 +29,8 @@ struct GoertzelT {
     uint32_t counter{ N - 1 };
 
     constexpr static float omega = 2.0 * cPi * k / N;
-    constexpr static float ci = gcem::sin(omega);
-    constexpr static float cr = gcem::cos(omega);
+    constexpr static float ci = sinf(omega);
+    constexpr static float cr = cosf(omega);
 
     constexpr static float alpha = 2.0 * cr;
     constexpr static float scale = N / 2.0;

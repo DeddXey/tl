@@ -3,7 +3,15 @@
 #include "log.h"
 
 #include <cstdint>
+
 #include <utility>
+
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#else
+#include <unistd.h>
+#endif
 
 ///
 /// \brief Descriptor of simple memory buffer
@@ -23,19 +31,19 @@ public:
                       M>
   {
     BufferDescriptor& bd;
-    int32_t idx;
+    size_t idx;
   public:
-    explicit iterator(BufferDescriptor& ibd, int32_t _idx) : bd(ibd), idx(_idx) {}
+    explicit iterator(BufferDescriptor& ibd, size_t _idx) : bd(ibd), idx(_idx) {}
     iterator& operator++() { idx = idx + 1; return *this; }
     iterator operator++(int) { iterator retval = *this; ++(*this); return retval; }
     bool operator==(iterator other) const { return idx == other.idx; }
     bool operator!=(iterator other) const { return !(*this == other); }
     const M& operator*() const { return bd.buffer[idx]; }
 
-    iterator operator + (int val)
+    iterator operator + (ssize_t val)
     {
       iterator temp = *this;
-      temp.idx += val;
+      temp.idx = static_cast<size_t>(static_cast<ssize_t>(temp.idx) + val);
       if (static_cast<size_t>(temp.idx) >= bd.size) {
         temp.idx = bd.size;
       }
@@ -45,9 +53,12 @@ public:
     iterator operator - (int val)
     {
       iterator temp = *this;
-      temp.idx = temp.idx - val;
-      if (temp.idx < 0) {
+      ssize_t tmp = static_cast<ssize_t>(temp.idx) - val;
+      if (tmp < 0) {
         temp.idx = 0;
+      }
+      else {
+        temp.idx = static_cast<size_t>(tmp);
       }
       return temp;
     }
@@ -76,7 +87,7 @@ public:
   BufferDescriptor(const M *ptr, const size_t len) : buffer(ptr), size(len) {}
   BufferDescriptor() = default;
 
-  template<int N>
+  template<size_t N>
   explicit BufferDescriptor(M (&array)[N]) noexcept : buffer(array), size(N)
   {
   }

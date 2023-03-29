@@ -24,7 +24,7 @@ class fifo_atomic
 //  friend class fifo_read_iterator<fifo_atomic<T, sz>>;
 public:
   using value_type [[maybe_unused]] = T;
-  constexpr static uint32_t depth   = sz;
+  constexpr static size_t depth   = sz;
 
     /// Iterator for fifo ring buffer
     class iterator;
@@ -34,7 +34,7 @@ public:
             T>
     {
         fifo_atomic<T, sz>*     fifo_;
-        uint32_t idx;
+        size_t idx;
 
         template<typename R>
         union value {
@@ -44,6 +44,12 @@ public:
 
     public:
 //        using value_type [[maybe_unused]] = F::value_type;
+
+
+        int32_t get_idx() const
+        {
+            return idx;
+        }
 
         iterator(): idx(0) {}
 
@@ -81,32 +87,34 @@ public:
             return temp;
         }
 
-        iterator operator + (int val)
+        iterator operator + (ssize_t  val)
         {
             iterator temp = *this;
-            temp.idx += val;
-            if (idx >= depth) {
-                idx -= depth;
+            temp.idx = static_cast<size_t>(static_cast<ssize_t>(temp.idx) + val);
+
+            if (temp.idx >= depth) {
+                temp.idx -= depth;
             }
+
             return temp;
         }
 
-        iterator operator - (int val)
+        iterator operator - (ssize_t val)
         {
             iterator temp = *this;
-            int32_t  tmp_idx = temp.idx - val;
+            ssize_t tmp_idx = static_cast<ssize_t>(temp.idx) - val;
             if (tmp_idx < 0) {
-                tmp_idx = depth + tmp_idx;
+                tmp_idx = static_cast<ssize_t>(depth) + tmp_idx;
             }
-            temp.idx = tmp_idx;
+            temp.idx = static_cast<size_t>(tmp_idx);
             return temp;
         }
 
-        uint32_t operator - (iterator other)
+        ssize_t operator - (iterator other)
         {
-            int out = this->idx - other.idx;
+            ssize_t out = static_cast<ssize_t>(this->idx) - static_cast<ssize_t>(other.idx);
             if (out < 0) {
-                out = depth + out;
+                out = static_cast<ssize_t>(depth) + out;
             }
 
             return out;
@@ -189,16 +197,16 @@ protected:
   std::atomic<uint32_t> used       = 0;
   std::array<T, sz>     data;
 
-  T& get_by_idx(const uint32_t idx)
+  T& get_by_idx(const size_t idx)
   {
     return data[idx];
   }
 
-  [[nodiscard]] uint32_t get_read_idx() const
+  [[nodiscard]] size_t get_read_idx() const
   {
     return readIndex;
   }
-  [[nodiscard]] uint32_t get_write_idx() const
+  [[nodiscard]] size_t get_write_idx() const
   {
     return writeIndex;
   }
@@ -288,7 +296,7 @@ public:
       readIndex = 0;
   }
   /// \brief Remove last read element from fifo
-  void pop(uint32_t num)
+  void pop(size_t num)
   {
     uint32_t try_used = used.load();
     do {

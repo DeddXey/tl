@@ -4,7 +4,7 @@
 #include <array>
 #include <cstdint>
 //#include "gcem.hpp"
-#include "instructions.h"
+//#include "instructions.h"
 
 #include "tlcfg.h"
 
@@ -25,11 +25,12 @@ namespace tl {
 /// \param pos позиция группы битов
 /// \return слово с установленной группой битов
 /// Позиция группы устанавливается так, что находится внутри 32-разрядного числа
-template<typename M, typename V, typename T>
-constexpr uint32_t setBitGroup(const M mult, const V val, const T pos)
+//template<typename M, typename V, typename T>
+constexpr inline uint32_t setBitGroup(const uint32_t mult, const uint32_t val, const uint32_t pos)
 {
   //    volatile uint16_t shift = ((pos & (32 / mult - 1)) * mult);
-  return (val << ((pos & (32L / mult - 1)) * mult));
+  return (val << ((pos & (32UL / mult - 1U))
+                  * mult));
 }
 
 /// \brief Установка групп битов в заданное значение
@@ -39,9 +40,9 @@ constexpr uint32_t setBitGroup(const M mult, const V val, const T pos)
 /// \param args остальные отмеченные позиции
 /// \return слово с установленными группами битов
 /// Позиция группы устанавливается так, что находится внутри 32-разрядного числа
-template<typename M, typename V, typename T, typename... Args>
+template</*typename M, typename V, typename T,*/ typename... Args>
 constexpr uint32_t
-setBitGroup(const M mult, const V val, const T pos, const Args... args)
+setBitGroup(const uint32_t mult, const uint32_t val, const uint32_t pos, const Args... args)
 {
   return (val << ((pos & (32L / mult - 1)) * mult))
          | setBitGroup(mult, val, args...);
@@ -72,7 +73,7 @@ constexpr uint32_t setBits()
 template<typename T, typename V, typename... Args>
 constexpr uint32_t setBits(const T field, const V val, Args... args)
 {
-  return (val << (field[0]) | setBits(args...));
+  return (val << (field[0U]) | setBits(args...));
 }
 
 ///
@@ -100,7 +101,7 @@ template<typename T, typename V, typename... Args>
 constexpr uint32_t
 setMasks(const T field, [[maybe_unused]] const V val, Args... args)
 {
-  return (((1 << field[1]) - 1) << (field[0]) | setMasks(args...));
+  return (((1 << field[1U]) - 1U) << (field[0U]) | setMasks(args...));
 }
 
 ///
@@ -140,16 +141,16 @@ constexpr void setRegister(volatile uint32_t &reg,
 template<typename T>
 constexpr uint32_t getRegField(volatile uint32_t &reg, const T field)
 {
-  uint32_t mask = (((1 << field[1]) - 1) << field[0]); // TODO: optimize?
-  return ((reg & mask) >> field[0]);
+  uint32_t mask = (((1U << field[1U]) - 1U) << field[0U]); // TODO: optimize?
+  return ((reg & mask) >> field[0U]);
 }
 
 template<typename... T>
 constexpr bool isRegFieldsSet(volatile uint32_t &reg, const T... fields)
 {
-  auto l = [](auto f) { return ((1 << f[1]) - 1) << f[0]; };
+  auto lambda = [](auto field) { return ((1U << field[1]) - 1U) << field[0U]; };
 
-  uint32_t mask = (l(fields) | ...); // TODO: optimize?
+  uint32_t mask = (lambda(fields) | ...); // TODO: optimize?
   return (reg & mask);
 }
 
@@ -209,7 +210,7 @@ constexpr uint8_t decLetterToByte(const uint8_t letter)
 ///
 constexpr uint8_t bcd2Byte(uint8_t val)
 {
-  return ((((val & 0xf0U) >> 4U) * 10U) + (val & 0x0fU));
+  return static_cast<uint8_t>((((val & 0xf0U) >> 4U) * 10U) + (val & 0x0fU));
 }
 
 ///
@@ -219,7 +220,8 @@ constexpr uint8_t bcd2Byte(uint8_t val)
 ///
 constexpr int16_t reverse16s(int16_t in)
 {
-  int16_t out = ((in & 0xffU) << 8U) | ((in >> 8U) & 0xffU);
+  auto out =
+    static_cast<int16_t>(((in & 0xffU) << 8U) | ((in >> 8U) & 0xffU));
   return out;
 }
 
@@ -282,7 +284,7 @@ inline void simpleDelay(const uint32_t delay)
   for (uint32_t i = 0; i < delay; ++i) {
     uint32_t a;
     ++a;
-    cpu::nop();
+
   }
 } // noinline НЕ ТРОГАТЬ!
 

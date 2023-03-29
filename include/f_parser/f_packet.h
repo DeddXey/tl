@@ -2,11 +2,13 @@
 
 #include "ranges/range.h"
 #include <cstdint>
-//#include <iostream>
+//#include "terminal.h"
 #include "f_parse_result.h"
 #include "f_packet_nav.h"
 #include "f_packet_full.h"
 #include "fifo_atomic.h"
+//#include "value.h"
+
 
 /// 6 * 2 = 12 bytes = 96 bits
 /// 2400 => 25Hz
@@ -22,7 +24,7 @@
 
 
 /// Base functional parser class
-template<typename T, typename Ctx, int sz>
+template<typename T, typename Ctx, size_t sz>
 class packet_parser_base {
 
 public:
@@ -41,31 +43,49 @@ protected:
   auto correct_fifo()
   {
     auto ret = [&](auto ran) -> decltype(ran){
-//      if constexpr (debug) {
-//        std::cout << "correct_fifo: \n";
-//      }
+      if constexpr (debug) {
+        con.debug() << "corr_f: ";
+      }
 
       if (ran) {
         if (tl::makeRange(fifo) == ran.value()) {
-//          if constexpr (debug) {
-//            std::cout << "\tskip one byte\n";
-//          }
-//          auto correction = ran.value().begin() - fifo.begin();
+          if constexpr (debug) {
+            con.debug()
+                << Attr::bright << "skip\n"
+                << Attr::reset;
+          }
           fifo.pop();
           return result_type(tl::Range(ran.value().begin() - 1, ran.value().end()));
         }
-//        if constexpr (debug) {
-//          std::cout << "\t corrected on packet\n";
-//        }
+        if constexpr (debug) {
+          con.debug() << Attr::bright
+                      << "corr on p\n"
+                      << Attr::reset;
+        }
         auto correction = ran.value().begin() - fifo.begin();
-        fifo.pop(correction);
+        if constexpr (debug) {
+          con.debug() << "corr " << Use::dec << (int32_t )correction << "\n";
+          con.debug()
+            << " corr rng:\n" << ran.value();
+          con.debug()
+            << "f b:\ne"<< tl::makeRange(fifo);
+
+        }
+
+        fifo.pop(static_cast<size_t>(correction));
+        if constexpr (debug) {
+
+          con.debug()
+            << "f a:\n"<< tl::makeRange(fifo);
+        }
+
         return ran;
       }
 
       if (ran.error() == parse_result_t::not_enough_data) {
-//        if constexpr (debug) {
-//          std::cout << "\t not_enough_data\n";
-//        }
+        if constexpr (debug) {
+          con.debug() << "not_en_dat\n";
+        }
         return ran;
       }
       return ran;
@@ -75,78 +95,100 @@ protected:
   auto check_byte(const uint8_t signature)
   {
     auto ret = [signature](auto ran) -> parse_result<decltype(ran)> {
-      auto a = ran.begin().template get_value_le<uint8_t>();
+
+      parser prs(ran);
+      auto a = prs.template get_value_le<uint8_t>();
+//        auto a = ran.begin().template get_value_le<uint8_t>();
 //      if constexpr (debug) {
-//        std::cout
-//          << "check byte:\n\texpected: "
-//          << std::hex
-//          << (int)signature
-//          << "\n\tfound: "
-//          << (int)(a.value())
-//          << std::endl;
+//        con.debug()
+//          << "check byte: expected: "
+//          << Use::hex
+//          << signature
+//          << " found: "
+//          << (a.value())
+//          << Use::endl;
 //      }
-      if (a.value() == signature) {
-        // Return range without signature
-        //        return std::make_optional(tl::Range(ran.begin() + 1, ran.end()));
-        return result_type(tl::Range(ran.begin() + 1, ran.end()));
+      if (a) {
+        if (a.value() == signature) {
+          // Return range without signature
+          //        return std::make_optional(tl::Range(ran.begin() + 1, ran.end()));
+          return result_type(tl::Range(ran.begin() + 1, ran.end()));
+        }
       }
       return result_type(parse_result_t::signature_not_found);
     };
     return ret;
   }
-  auto check_size(uint32_t size)
+  auto check_size(size_t size)
   {
     auto ret = [=](auto ran) -> parse_result<decltype(ran)> {
-//      uint32_t szz = (ran.end() - ran.begin());
 //      if constexpr (debug) {
-//        std::cout
-//          << "check_size: \n\t"
-//          << "real: "
-//          << std::dec
+//        uint32_t szz = (ran.end() - ran.begin());
+//        con.debug()
+//          << "check_size: real: "
+//          << Use::w0
+//          << Use::dec
 //          << szz
-//          << "\n\tneed: "
-//          << size
-//          << std::endl;
+//          << " need: "
+//          << size - 1
+//          << Use::endl;
 //      }
 
-      if ((ran.end() - ran.begin()) < size) {
+      if ((ran.end() - ran.begin()) < static_cast<ssize_t>(size) - 1 ) {
         // Return empty range
         return result_type(parse_result_t::not_enough_data);
       }
-      //      return std::make_optional(tl::Range(ran.begin(), ran.begin() + depth));
-      return result_type(tl::Range(ran.begin(), ran.begin() + size));
-      //    std::cout << "Ok" << std::endl;
+      if constexpr (debug) {
+        con.debug() << "***" << (int32_t)(ran.end() - ran.begin()) << "\n";
+        con.debug() << "i1 " << ran.begin().get_idx() << "\n";
+        con.debug() << "i2 " << ran.end().get_idx() << "\n";
+
+        con.debug() << tl::Range(ran.begin(), ran.begin() + size - 1);
+      }
+      return result_type(tl::Range(ran.begin(), ran.begin() + static_cast<ssize_t>(size) - 1));
     };
     return ret;
   }
+
   auto check_crc(auto crc_fun)
   {
     auto ret = [=](auto ran) -> parse_result<decltype(ran)> {
-      //    std::cout << "check_crc" << std::endl;
-      auto crc_itr = ran.end() - 2;
-      uint16_t packet_crc = crc_itr.template get_value_le<uint16_t>().value();
-//      uint16_t crc = crc_fun(ran.begin(), ran.end() - 2);
-//      if constexpr (debug) {
-//        std::cout
-//          << "check_crc: \n\t"
-//          << "expected: "
-//          << std::hex
-//          << crc
-//          << "\n\tfound: "
-//          << packet_crc
-//          << std::endl;
-//      }
+      // std::cout << "check_crc" << std::endl;
+//      auto crc_itr = ran.end() - 2;
 
+      parser prs(tl::Range(ran.end() - 2, ran.end()));
+//        uint16_t packet_crc = crc_itr.template get_value_le<uint16_t>().value();
+      uint16_t packet_crc = prs.template get_value_le<uint16_t>().value();
+      if constexpr (debug) {
+        uint16_t crc = crc_fun(ran.begin(), ran.end() - 2);
+        con.debug()
+          << Fg::red
+          << Use::w4
+          << "crc: exp: "
+          << Use::hex << crc
+          << " found: "
+          << packet_crc
+          << Attr::reset
+          << Use::endl;
+      }
+
+      if constexpr (debug) {
+        con.debug() << tl::Range(ran.begin(), ran.end() - 2);
+      }
 
       if (packet_crc == crc_fun(ran.begin(), ran.end() - 2)) {
-        //      std::cout << "Ok" << std::endl;
+        if constexpr (debug) {
+          con.debug() << "Ok\n";
+        }
         return result_type(ran);
+
       }
       // Return empty range
       return result_type(parse_result_t::bad_crc);
     };
     return ret;
   }
+
   auto unwrap_if_fail(auto default_value)
   {
     auto ret = [default_value](auto opt) -> decltype(opt) {
@@ -155,17 +197,23 @@ protected:
         auto out = tl::Range(opt.value().end(),
                              default_value.value().end());
 
-//        if constexpr (debug) {
-//          std::cout << "unwrap_if_fail: success " << std::endl;
-//        }
+        if constexpr (debug) {
+          con.debug() << "u_i_f: s\n";
+          con.debug()
+            << "def:\n" << default_value.value();
+          con.debug()
+            << "in:\n" << opt.value();
+          con.debug()
+            << "out:\n" << out;
+        }
         return parse_result(out);
       }
       if (opt.error() == parse_result_t::not_enough_data) {
           return opt;
       }
-//      if constexpr (debug) {
-//          std::cout << "unwrap_if_fail: default " << std::endl;
-//      }
+      if constexpr (debug) {
+          con.debug() << "unwrap_if_fail: default\n";
+      }
       return default_value;
     };
     return ret;
@@ -180,8 +228,6 @@ protected:
     };
     return ret;
   }
-
-
 
 public:
 
@@ -203,7 +249,7 @@ public:
 };
 
 /// Custom functional parser class/ Should be in user code
-template<typename C, int fifo_len = 300>
+template<typename C, size_t fifo_len = 300>
 class packet_parser
   : public packet_parser_base<packet_parser<C, fifo_len>, C, fifo_len> {
 
@@ -217,10 +263,11 @@ class packet_parser
   auto parse_rc(T&& packet)
   {
     auto ret = [this, &packet](auto ran)  -> decltype(ran) {
+//      con.debug() <<"@";
       auto out =
         ran
         | base::mbind(base::check_byte(packet.signature)) // signature
-        | base::mbind(base::check_size(sizeof(packet) + 3)) // id + crc
+        | base::mbind(base::check_size(packet.size())) // id + crc
         | base::mbind(base::check_crc(crc_mav))
         | base::mbind(base::check_byte(base::context->id))                       // id
         | base::mbind(packet.fill())
@@ -238,9 +285,7 @@ public:
   auto parse()
   {
     auto ret = [this](auto ran) -> decltype(ran) {
-//      if constexpr (base::debug) {
-//        std::cout << "###parse: \n";
-//      }
+
       auto out =
         ran
         | parse_rc(packet_rc_full(base::context))

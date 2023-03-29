@@ -311,8 +311,8 @@ LogStream<T, f> &operator<<(LogStream<T, f> &stream, const uint32_t val)
 
     uint8_t i = 0;
     do {
-      int32_t digit = 0;
-      digit         = sum % stream.getBase();
+      uint8_t digit = 0;
+      digit         = static_cast<uint8_t>(sum % stream.getBase());
       if (digit < 0xA) {
         buffer[i] = '0' + digit;
       }

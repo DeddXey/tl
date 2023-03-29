@@ -1,6 +1,4 @@
-#ifndef RANGE_H
-#define RANGE_H
-
+#pragma once
 #include <cstddef>
 #include <type_traits>
 #include <utility>
@@ -18,6 +16,8 @@ class Range
   I2 end_;
 
 public:
+
+  using value_type = typename I1::value_type;
 
   constexpr Range(): begin_(), end_() {}
 
@@ -52,6 +52,30 @@ public:
   {
     return (this->begin_ == other.begin_)&&(this->end_ == other.end_);
   }
+
+  // TODO: add guard of LogStream
+//  template<typename T>
+//  friend std::enable_if<std::is_same_v<typename I1::value_type, uint8_t>,
+//                        LogStream<T, true> &>::type
+//  operator<<(LogStream<T, true> &stream, const Range<I1, I2> &range)
+//  {
+//    stream << Use::hex << Fg::cyan << "Range\n";
+//
+//    uint8_t cnt = 0;
+//
+//    for (auto i : range) {
+//      if (cnt++ % 16 == 0) {
+//        stream.putChar('\n');
+//      }
+//
+//      stream << Use::w2 << i << " ";
+//    }
+//    stream << Attr::reset << Use::endl;
+//    return stream;
+//  }
+
+
+
 
 
 };
@@ -103,6 +127,3 @@ constexpr auto operator|(Rng &&rng, F &&c)
   return c(std::forward<Rng>(rng));
 }
 
-
-
-#endif // RANGE_H
