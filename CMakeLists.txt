@@ -42,21 +42,22 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Expose required variable (DOCTEST_INCLUDE_DIR) to parent scope
     ExternalProject_Get_Property(doctest source_dir)
     set(DOCTEST_INCLUDE_DIR ${source_dir}/doctest CACHE INTERNAL "Path to include folder for doctest")
+#    add_library(doctest INTERFACE)
 
     add_executable(test_runner
 #            tests/f_parser_test.cpp
             tests/floatstatictest.cpp
             tests/utils_tst.cpp
             tests/statcnt_tst.cpp
-
-
             tests/main.cpp
             )
+    add_dependencies(test_runner doctest)
     target_include_directories(test_runner
             PUBLIC ${DOCTEST_INCLUDE_DIR}
             PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
     target_compile_features(test_runner PUBLIC cxx_std_20)
-    add_test(NAME utility COMMAND test_runner)
+    target_link_libraries(test_runner INTERFACE doctest)
+#    add_test(NAME utility COMMAND test_runner)
 
 endif()
 
