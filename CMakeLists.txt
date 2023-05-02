@@ -50,7 +50,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
             tests/utils_tst.cpp
             tests/statcnt_tst.cpp
             tests/main.cpp
-            )
+            tests/wake_test.cpp include/f_parser/wake.h)
     add_dependencies(test_runner doctest)
     target_include_directories(test_runner
             PUBLIC ${DOCTEST_INCLUDE_DIR}
