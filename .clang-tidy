@@ -1,7 +1,7 @@
 ---
-Checks:          '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type, -llvm-*, -llvmlibc-*, -altera-*'
+Checks: '*,-fuchsia-*,-google-*,-zircon-*,-abseil-*,-modernize-use-trailing-return-type, -llvm-*, -llvmlibc-*, -altera-*, -cppcoreguidelines-avoid-c-arrays, -modernize-avoid-c-arrays, -hicpp-avoid-c-arrays'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
-FormatStyle:     none
+FormatStyle: none
 
 

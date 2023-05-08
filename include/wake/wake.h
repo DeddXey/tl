@@ -54,7 +54,7 @@ struct frame
   static void send(uint8_t addr,
                    uint8_t cmd,
                    uint8_t length,
-                   Data   &data,
+                   Data   &&data,
                    SF    &&send_fun,
                    bool    crc_enable = true)
   {
@@ -63,7 +63,7 @@ struct frame
     send_fun(frame::fend);
     crc_calculated.add_byte(frame::fend);
     if ((addr & frame::addr_mask) != 0) {
-      crc_calculated.add_byte(addr & (~frame::addr_mask));
+      crc_calculated.add_byte(addr & static_cast<uint8_t>((~frame::addr_mask)));
       stuff(addr, std::forward<SF>(send_fun));
     }
     crc_calculated.add_byte(cmd);
