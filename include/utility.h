@@ -3,6 +3,7 @@
 /// \file
 #include <array>
 #include <cstdint>
+#include <cmath>
 //#include "gcem.hpp"
 //#include "instructions.h"
 
