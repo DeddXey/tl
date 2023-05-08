@@ -59,6 +59,39 @@ constexpr uint8_t Crc8(const T &c)
   return crc;
 }
 
+template<uint8_t init_value = 0xFF, uint8_t polynom=0x31>
+class crc8_iterated
+{
+//  constexpr static uint8_t polynom = 0x31;
+  uint8_t                  crc     = init_value;
+
+public:
+  void init()
+  {
+    crc = init_value;
+  }
+  uint8_t add_byte(const uint8_t byte)
+  {
+    crc ^= byte;
+    for (auto i = 0; i < 8; ++i) {
+      if ((crc & 0x80U) != 0) {
+        crc = (uint8_t)((crc << 1U) ^ polynom);
+      }
+      else {
+        crc <<= 1U;
+      }
+    }
+    return crc;
+  }
+  uint8_t get() const
+  {
+    return crc;
+  }
+};
+
+
+
+
 inline std::array<uint32_t, 256> generate_crc_lookup_table() noexcept
 {
   //    auto const reversed_polynomial = uint32_t{0x04C11DB7};
