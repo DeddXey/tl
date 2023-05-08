@@ -5,7 +5,10 @@ enum class parse_result_t {
     ok,
     signature_not_found,
     not_enough_data,
-    bad_crc
+    bad_crc,
+    no_data,
+    frame_start,
+    bad_esc
 };
 
 struct parse_error {};
