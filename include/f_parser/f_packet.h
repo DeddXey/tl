@@ -42,7 +42,7 @@ protected:
 
   auto correct_fifo()
   {
-    auto ret = [&](auto ran) -> decltype(ran){
+    auto ret = [this](auto ran) -> decltype(ran){
       if constexpr (debug) {
         con.debug() << "corr_f: ";
       }
@@ -119,6 +119,29 @@ protected:
     };
     return ret;
   }
+
+
+  /// Check bits by mask
+  /// Not changed the range
+  template<typename S>
+  auto check_bits(const S mask)
+  {
+    auto ret = [mask](const auto ran) -> parse_result<decltype(ran)> {
+
+      parser prs(ran);
+      auto optval = prs.template get_value_le<S>();
+
+      if (optval) {
+        if ((optval.value() & mask) == mask) {
+          return result_type(tl::Range(ran.begin(), ran.end()));
+        }
+      }
+      return result_type(parse_result_t::signature_not_found);
+    };
+    return ret;
+  }
+
+
   auto check_size(size_t size)
   {
     auto ret = [=](auto ran) -> parse_result<decltype(ran)> {
