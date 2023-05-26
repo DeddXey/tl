@@ -1,5 +1,4 @@
-#ifndef ADC24TOINT32ITERATOR_H
-#define ADC24TOINT32ITERATOR_H
+#pragma once
 
 #include "ranges/range.h"
 #include <cstdint>
@@ -11,7 +10,7 @@ namespace tl {
 ///
 /// \tparam It
 template<typename It>
-class Adc24ToInt32Iterator
+class [[deprecated]] Adc24ToInt32Iterator
 {
   It it;
 
@@ -44,7 +43,7 @@ public:
   constexpr Adc24ToInt32Iterator operator++(int) noexcept
   {
     const Adc24ToInt32Iterator tmp(*this);
-                               operator++();
+    operator++();
     return tmp;
   }
 
@@ -81,6 +80,72 @@ constexpr auto adc24ToInt32() noexcept
 
   return ret;
 }
-} // namespace tl
 
-#endif // ADC24TOINT32ITERATOR_H
+template<std::ranges::input_range R>
+  requires std::ranges::view<R>
+class adc24int32_view : public std::ranges::view_interface<adc24int32_view<R>>
+{
+
+public:
+  explicit adc24int32_view(R&& r) :
+    begin_(std::begin(r)), end_(std::end(r))
+  {
+  }
+
+  class iterator
+  {
+    std::ranges::iterator_t<R> itr;
+
+  public:
+    using iterator_category = std::forward_iterator_tag;
+    using value_type        = int32_t;
+    using difference_type   = ptrdiff_t;
+    using reference         = int16_t &;
+
+    constexpr explicit iterator(std::ranges::iterator_t<R> i) : itr(i) {}
+
+    constexpr int32_t operator*() const noexcept
+    {
+      return (*(itr) << 24 | (*(itr + 1) << 16) | (*(itr + 2) << 8)) >> 8;
+    }
+
+    constexpr iterator &operator++() noexcept
+    {
+      itr += 3;
+      return *this;
+    }
+
+    constexpr iterator operator++(int) noexcept
+    {
+      const iterator tmp(*this);
+      operator++();
+      return tmp;
+    }
+
+    constexpr bool operator!=(const iterator &other) const noexcept
+    {
+      return (this->itr != other.itr);
+    }
+
+    constexpr bool operator==(const iterator &other) const noexcept
+    {
+      return (!(*this != other));
+    }
+  };
+
+  auto begin()
+  {
+    return begin_;
+  }
+
+  auto end()
+  {
+    return end_;
+  }
+
+private:
+  iterator begin_;
+  iterator end_;
+};
+
+} // namespace tl
